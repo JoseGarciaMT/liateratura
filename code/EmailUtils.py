@@ -13,7 +13,7 @@ import sib_api_v3_sdk
 from dotenv import load_dotenv
 
 
-def sendEmail(target,sender,subject,body,filename):
+def send_email(target, sender_name, sender_email, subject, body, filename):
     # Instantiate the client
     configuration = sib_api_v3_sdk.Configuration()
     load_dotenv()
@@ -29,7 +29,7 @@ def sendEmail(target,sender,subject,body,filename):
     send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
         to = [{"email":target}],
         html_content = body,
-        sender = {"name": sender.get("name"), "email": sender.get("email")},
+        sender = {"name": sender_name, "email": sender_email},
         subject = subject,
         attachment = attachment
     )

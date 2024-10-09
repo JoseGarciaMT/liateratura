@@ -22,10 +22,13 @@ from googleapiclient.errors import HttpError
 
 
 class GDriveManager:
-    def _generate_gdoc_from_text(self, title, text):
+    def _generate_gdoc_from_text(self, title, text, formatting = {"font_family":"arial","font_size":"11","line-height":"1.5"}):
     
-        text = "## "+title+"\n\n"+text
-        htmldoc = markdown(text)
+        mkdown = "## **" + title + "**" + \
+            "\n\n <p style=\"font-size:" + formatting.get("font_size") + ";" \
+                +"font-family:" + formatting.get("font_family") + ";" \
+                +"line-height:" + formatting.get("line-height") + "\">" + text + "</p>"
+        htmldoc = markdown(mkdown)
     
         gdoc = self.drive.CreateFile(
             {

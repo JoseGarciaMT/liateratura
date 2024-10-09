@@ -16,18 +16,23 @@ from EmailUtils import send_email
 
 chatGPT = ChatGPT()
 story = chatGPT.query("Escríbeme un microrrelato en español de no más de 120 palabras que empiece por la frase 'Se acercó al mostrador' y que esté ambientado en una farmacia. Quiero que el microrrelato suene inteligente, y que alabe las virtudes de los farmacéuticos.")
-title = chatGPT.query("Ahora dame el título ideal para dicho micorrelato.")
+title = chatGPT.query("Ahora dame el título ideal para este relato corto:\n"+story)
+
+title = title.replace("\"", "").replace("*","")
 
 filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", title+".pdf")
 
-assert 1==0
+text_to_pdf_file(title, story, filename)
 
-archivo = text_to_pdf_file(title, story, filename)
+# send_email(target = "jose.garcia.mt@gmail.com",
+#           sender_name = "Gerardo Pérez Trías",
+#           sender_email = "gerardopereztrias@gmail.com",
+#           subject = "Inscripción en concurso XYZ",
+#           body = "Aquí va el texto del email",
+#           attachment_loc = filename,
+#           attachment_name = title+".pdf"
+#           )
 
-send_email(target = "jose.garcia.mt@gmail.com",
-          sender_name = "Gerardo Pérez Trías",
-          sender_email = "gerardopereztrias@gmail.com",
-          subject = "Inscripción en concurso XYZ",
-          body = "Aquí va el texto del email",
-          filename = filename
-          )
+
+
+

@@ -22,13 +22,18 @@ class ChatGPT:
           project = 'proj_qAerChpO0bWKE2Xa8dhofBu5'
         )
         
+        self.messages = []
+        
         return None
          
 
     def query(self, input_query, model="gpt-4o-mini"):
-        response = self.client.chat.completions.create(model = model,
-                                                  messages = [{"role": "user", "content": input_query}]
-        )
+        self.messages.append({"role": "user", "content": input_query})
+        
+        response = self.client.chat.completions.create(model = model, messages = self.messages)
+        chat_msg = response.choices[0].message.content
+        
+        self.messages.append({"role": "system", "content": chat_msg})
             
             
-        return response.choices[0].message.content
+        return chat_msg

@@ -162,3 +162,7 @@ cython_debug/
 #.idea/
 .DS_Store
 *.pdf
+data/stories/*
+code/client_secrets.json
+code/credentials.json
+code/token.json

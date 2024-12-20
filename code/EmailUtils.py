@@ -13,6 +13,9 @@ import sib_api_v3_sdk
 from dotenv import load_dotenv
 
 
+app_password_gmail = "fnrz qqwk bfpb treo"
+
+
 def send_email(target, sender_name, sender_email, subject, 
                body, attachment_loc, attachment_name):
     # Instantiate the client

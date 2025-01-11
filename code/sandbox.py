@@ -25,7 +25,7 @@ contest = Contest(name="Concurso X",
                   extension="pdf"
                   )
 
-for i in range(10):
+for i in range(1):
     
     story = contest.generate_story()
 
@@ -33,6 +33,12 @@ for i in range(10):
     print(story.metadata)
     print(story.story)
     
+
+
+
+author = {"name":"Gerardo Pérez Trías", "email":"gerardopereztrias@gmail.com"}
+
+contest.submit_story(gdriver, story, author)
 
 
 

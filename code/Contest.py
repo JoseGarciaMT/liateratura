@@ -57,12 +57,12 @@ class Contest:
         
     
     def submit_story(self, gdriver, story, author):
-        story.generate_file(gdriver, self.name, self.formatting)
+        story.generate_file(gdriver, self.formatting)
         send_email(target = self.email, 
-                   sender_name = author.name, 
-                   sender_email = author.email, 
+                   sender_name = author.get("name"), 
+                   sender_email = author.get("email"), 
                    subject = self.subject, 
                    body = "Adjunto documentos para participar en el " + self.name, 
                    attachment_loc = story.story_uuid, 
-                   attachment_name = story.title+self.extension)
+                   attachment_name = story.title+self.formatting["extension"])
         

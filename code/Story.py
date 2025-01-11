@@ -63,7 +63,7 @@ class Story:
         self.title = self.title.replace("\"", "").replace("*","")
         
         
-    def generate_file(self, gdriver, contest_name,
+    def generate_file(self, gdriver,
                       formatting = {"font_family":"arial",
                                     "font_size":"11",
                                     "line-height":"1.5",
@@ -71,8 +71,8 @@ class Story:
         
         self.filename = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                                 "data", 
-                                contest_name,
-                                str(self.story_uuid) + formatting["extension"])
+                                "stories",
+                                str(self.story_uuid) + "." + formatting["extension"])
         
         if "pdf" in formatting["extension"]:
             mime = "application/pdf"

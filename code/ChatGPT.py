@@ -27,10 +27,22 @@ class ChatGPT:
         return None
          
 
-    def query(self, input_query, model="gpt-4o-mini"):
+    def query(self, input_query, model="gpt-4o"):
         self.messages.append({"role": "user", "content": input_query})
         
         response = self.client.chat.completions.create(model = model, messages = self.messages)
+        chat_msg = response.choices[0].message.content
+        
+        self.messages.append({"role": "system", "content": chat_msg})
+            
+            
+        return chat_msg
+    
+    
+    def query_blank_slate(self, input_query, model="gpt-4o"):
+        self.messages.append({"role": "user", "content": input_query})
+        
+        response = self.client.chat.completions.create(model = model)
         chat_msg = response.choices[0].message.content
         
         self.messages.append({"role": "system", "content": chat_msg})

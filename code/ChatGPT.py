@@ -42,7 +42,7 @@ class ChatGPT:
     def query_blank_slate(self, input_query, model="gpt-4o"):
         self.messages.append({"role": "user", "content": input_query})
         
-        response = self.client.chat.completions.create(model = model)
+        response = self.client.chat.completions.create(model = model, messages=[{"role": "user", "content": input_query}])
         chat_msg = response.choices[0].message.content
         
         self.messages.append({"role": "system", "content": chat_msg})

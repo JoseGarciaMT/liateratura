@@ -13,10 +13,8 @@ import sib_api_v3_sdk
 from dotenv import load_dotenv
 
 
-app_password_gmail = "fnrz qqwk bfpb treo"
 
-
-def send_email(target, sender_name, sender_email, subject, 
+def send_email_sib(target, sender_name, sender_email, subject, 
                body, attachment_loc, attachment_name):
     # Instantiate the client
     configuration = sib_api_v3_sdk.Configuration()
@@ -40,3 +38,38 @@ def send_email(target, sender_name, sender_email, subject,
     
     
     api_instance.send_transac_email(send_smtp_email)
+    
+
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.utils import formatdate
+from email import encoders
+
+
+def send_email_gmail(target, sender_name, sender_email, sender_pwd, subject, 
+               body, attachments=[]):
+    
+    msg = MIMEMultipart()
+    msg.attach(MIMEText(body))
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = target
+    msg['Date'] = formatdate(localtime=True)
+    
+    for path, filename in attachments:
+        part = MIMEBase('application', "octet-stream")
+        with open(path, 'rb') as file:
+            part.set_payload(file.read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition',
+                        'attachment; filename={}'.format(filename))
+        msg.attach(part)
+    
+    
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+       smtp_server.login(sender_email, sender_pwd)
+       smtp_server.sendmail(sender_email, target, msg.as_string())
+

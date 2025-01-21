@@ -9,6 +9,7 @@ Created on Thu Oct  3 12:06:57 2024
 
 from GDriveManager import GDriveManager
 from Contest import Contest
+from EmailUtils import send_email_gmail
 
 gdriver = GDriveManager()
 
@@ -36,13 +37,21 @@ for i in range(1):
 
 
 
-author = {"name":"Gerardo Pérez Trías", "email":"gerardopereztrias@gmail.com"}
+# author = {"name":"Gerardo Pérez Trías", "email":"gerardopereztrias@gmail.com"}
 
-contest.submit_story(gdriver, story, author)
-
-
+# contest.submit_story(gdriver, story, author)
 
 
+story.generate_file((gdriver))
 
 
+# sender_name = "Jose GMT liateratura"
+# sender_email = "jose.garcia.mt@gmail.com"
+# target = ["jose.garcia.mt@gmail.com"]
+# sender_pwd = "lbon gpkg wdum vhjc"
+# subject = "Email Subject: PROBANDO 123"
+# body = "This is the body of the text message"
+# attachments = [("../data/temp/story.pdf", "titulo.pdf")] 
 
+# send_email_gmail(target, sender_name, sender_email, sender_pwd, subject, 
+#                body, attachments)

@@ -1,0 +1,33 @@
+idx,tipo,prompt
+0,concurso_permitido,"A continuación, te reproduzco las bases de un concurso literario en el que me gustaría participar con tu ayuda:
+                                              
+{raw}
+                                          
+{restricting_cond} ¿Me permiten las bases participar?  "
+1,extraer_bases,"Estoy intentando extraer las bases del concurso cuya descripción reproduzco a continuación de modo que la información quede limpiamente ordenada acorde a los siguientes epígrafes:
+{regex_out_keys}
+
+Descripción del concurso:
+
+{raw}
+
+¿Podrías ayudarme a completar los datos que me faltan y corregir los que no se han extraído correctamente sin añadir comentarios? Me gustaría que quedara lo más esquemático posible.
+                                    
+A este respecto, me gustaría que el ""formato"" se refiriera a cómo se ha de realizar el envío (tipo y tamaño de letra, folio, formato de archivo...), que el apartado ""tema"" contuviera la información acerca de la temática en torno a la que debe girar la obra o la temática en torno a la que se puede deducir que a los organizadores les gustaría que girara la obra, y que la ""extensión"" estuviera, a ser posible, siempre en número de líneas, palabras, caracteres o páginas, indicada como en el siguiente ejemplo: ""extensión"": mínimo: 100 páginas; máximo: 150 páginas. 
+
+También querría que, en caso de que la divisa de los premios monetarios no fuera el euro, se convirtiera la cifra para que apareciese en euros, y que la entrada ""otros idiomas"" incluyera una enumeración de las otras lenguas en las que se puede presentar la obra al concurso, en caso de que se ofrezca dicha posibilidad. 
+
+Toda la información que no se pueda extraer de la ""descripción del concurso"", me gustaría que figurara del mismo modo.
+
+Por si pudiera servir a modo de referencia, esta es la información que he podido extraer yo por mi cuenta y que necesito que me corrijas y me completes:
+
+{regex_out}
+"
+2,extraer_cuento,"¿Me podrías escribir una obra que cumpla con todas las condiciones que se citan en el siguiente diccionario?
+                                            
+{bases}
+                                      
+También me gustaría que {story_addons}."
+3,reextraer_cuento,"¿Me podrías escribir una obra que cumpla con todos los requisitos que se proponen a continuación?
+                                         
+{chatgpt_resp_cuento}"

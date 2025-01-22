@@ -9,9 +9,10 @@ Created on Sat Dec  4 19:44:39 2021
 import urllib
 import requests
 from bs4 import BeautifulSoup as bs
-import os, regex
+import os, regex, re
 import random
 import pandas as pd
+import numpy as np
 from collections import Counter
 from lxml.html import fromstring
 from unidecode import unidecode
@@ -19,6 +20,7 @@ import time
 from ChatGPT import ChatGPT
 from pprint import pprint
 from tqdm import tqdm
+from DatabaseConnector import _read_file, _write_file
 
 
 
@@ -172,9 +174,9 @@ if __name__ == "__main__":
     prompts_path = os.path.join(root_path, "data", "prompts.csv")
     
     if os.path.exists(finaldata_path):
-        whole_df = pd.read_csv(finaldata_path)
+        whole_df = _read_file(finaldata_path)
     else:
-        prompts_df = pd.read_csv(prompts_path)
+        prompts_df = _read_file(prompts_path)
         prompts = dict(zip(prompts_df.tipo, prompts_df.prompt))
         
         ## VARS
@@ -215,9 +217,11 @@ if __name__ == "__main__":
                 if cond_mail and cond_spain and not (cond_age or cond_resid or cond_alumn):
                     url = "https://www.escritores.org"+concurso.find("a")["href"]
                     resp0 = get_proxies(url)
-                    if not resp0:
-                        time.sleep(1)
+                    while_n = 0
+                    while not (resp0 or while_n >= 5):
+                        time.sleep(5)
                         resp0 = get_proxies(url)
+                        while_n += 1
             
                     if resp0:
                         mini_soup = bs(resp0.content, "html.parser")
@@ -226,26 +230,29 @@ if __name__ == "__main__":
                         input_params["regex_out"] = relevant_info_retriever(mini_soup, input_params["raw"])  
                         input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
                         
-                        input_params["chatgpt_restrictions"] = chatGPT.query_blank_slate(prompts.get("concurso_permitido").format(**input_params))
+                        input_params["chatgpt_restrictions"] = chatGPT.query_blank_slate(prompts.get("concurso_permitido").format(**input_params), model="gpt-4o-mini")
                                           
                         if not regex.search(r"(^No|desafortunadamente|lamentablemente|por\sdesgracia|no\scumples)", input_params["chatgpt_restrictions"], regex.I):
                             
-                            chatgpt_resp_bases = chatGPT.query_blank_slate(prompts.get("extraer_bases").format(**input_params))
+                            chatgpt_resp_bases = chatGPT.query_blank_slate(prompts.get("extraer_bases").format(**input_params), model="gpt-4o-mini")
                                     
                             keys = list(input_params["regex_out"].keys())
                             end_ch = 0
                             concursos_dict[n] = {}
                             for i, e in enumerate(keys):
-                                end_ch = regex.search(regex.compile(keys[i+1]), chatgpt_resp_bases).start() if (i+1 < len(keys)-1 and regex.search(regex.compile(keys[i+1]), chatgpt_resp_bases)) else (end_ch + regex.search(r"\n+", chatgpt_resp_bases[end_ch:]).end() if regex.search(r"\n+", chatgpt_resp_bases[end_ch:]) else end_ch)
+                                end_ch = (regex.search(regex.compile(keys[i+1]), chatgpt_resp_bases).start() 
+                                          if (i+1 < len(keys)-1 and regex.search(regex.compile(keys[i+1]), chatgpt_resp_bases)) 
+                                          else (end_ch + regex.search(r"\n+", chatgpt_resp_bases[end_ch:]).end() 
+                                                if regex.search(r"\n+", chatgpt_resp_bases[end_ch:]) else end_ch))
                                 concursos_dict[n][e] = regex.sub(r"^\W+|[\,\W]+$", "", chatgpt_resp_bases[regex.search(regex.compile(e), chatgpt_resp_bases).end(): end_ch])
 
                             input_params["bases"] = concursos_dict[n]
                             input_params["chatgpt_resp_cuento"] = chatGPT.query_blank_slate(prompts.get("extraer_cuento").format(**input_params))
                                       
-                            all_weirdos = regex.findall(r"(\*{2}[A-Z]\w*(\s\w+){,2}\:?\*{2})|(\#+\s?[A-Z]\w+\:)", input_params["chatgpt_resp_cuento"])
+                            all_weirdos = regex.findall(r"(\*{2,}[A-Z]\w*(\s\w+){,2}\:?\*{2,})|(\#+\s?[A-Z]\w+\:)", input_params["chatgpt_resp_cuento"])
                                       
                             if len(all_weirdos) > 2:
-                                input_params["chatgpt_resp_cuento1"] = chatGPT.query_blank_slate(prompts.get("reextraer_cuento").format(**input_params))
+                                input_params["chatgpt_resp_cuento1"] = chatGPT.query_blank_slate(prompts.get("extraer_cuento").format(**input_params))
                             
                             input_params.update(concursos_dict_n)
                             
@@ -269,7 +276,7 @@ if __name__ == "__main__":
                                                         
                             if n % 15 == 0 and n > 1:
                                 whole_df = pd.concat(dfs, axis=0)
-                                whole_df.to_csv(data_path)
+                                _write_file(whole_df, data_path)
                                 print("Shape of dataframe to save:", whole_df.shape)
                                 print("-------------------NEXT BATCH-----------------------")
                                 print()
@@ -277,10 +284,17 @@ if __name__ == "__main__":
         
 
         whole_df = pd.concat(dfs, axis=0)
-        whole_df.to_csv(finaldata_path)
         print(whole_df[["nombre", "tema", "chatgpt_cond_resp", "chatgpt_output"]].head())
         
+        final_story = np.where(whole_df.chatgpt_resp_cuento.str.count(r"[\#\*]{2,}\s?(parte|cap\wtulo|[ivx]+)\s?\d+", flags=re.I) <= 4, 
+                               np.where(whole_df.chatgpt_resp_cuento.str.count(r"[\#\*]{2,}\s?(sinopsis|introducci\wn|desenlace|conclusi\wn|estructura|desarrollo|cl\wmax)", flags=re.I) <= 2, 
+                                        np.where(whole_df.chatgpt_resp_cuento.str.count(r"(título|cuento\scompleto)", flags=re.I) >= 1, whole_df.chatgpt_resp_cuento, whole_df.chatgpt_resp_cuento1), 
+                                        whole_df.chatgpt_resp_cuento1), whole_df.chatgpt_resp_cuento1) 
+
+        whole_df = whole_df.assign(final_story=final_story)
     
+
+        _write_file(whole_df, finaldata_path)
 
     
     

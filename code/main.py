@@ -158,20 +158,6 @@ def story_displayer():
         
         input_params, content = {}, {}
 
-        # selected_contest = session["selected_contest"]
-        # input_params["story_addons"] = session["story_addons"]
-        selected_contest = 5
-        input_params["story_addons"] = "que vaya sobre un enterrador."
-        input_params["bases"] = contest.final_bases.get(selected_contest)
-        path = os.path.join(root_path, "data", "stories", f"contest_{session['user']}.pkl")
-        if not os.path.exists(path):
-            final_response = generate_chatgpt_story(input_params)
-            _write_file({selected_contest: final_response}, path)
-        else:
-            final_response = _read_file(path)
-        
-        content["title"] = final_response.get("final_story_title")
-        content["story"] = final_response.get("final_story")
                           
     return render_template('cuento.html', content=content)
   

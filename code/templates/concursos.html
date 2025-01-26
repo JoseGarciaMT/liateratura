@@ -11,34 +11,42 @@
 
 	
 <body>
-    <div class="contest_names" id="contest_names">
-        <!-- For loop logic of jinja template -->
-        {%for k, conc in content.items()%} 
-            <button class="button-48" id="contest_name_btn" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc["clean_name"]}}</span></button>
-        {%endfor%} 
-    </div>
-            
-            
-    <div class="contest_rules" id="contest_rules">
-        {%for k, conc in content.items()%} 
-            <ul class="dropdown-menu" id="secondSel_{{k}}" display="none">
-                <li>{{ conc.get("premio") }}</li>
-                <li>{{ conc.get("restricciones") }}</li>
-                <li>{{ conc.get("fecha_de_vencimiento") }}</li>
-                <li>{{ conc.get("extension") }}</li>
-            </ul>
-        {%endfor%} 
-    </div>
-
-
+     <div class="contest_names" id="contest_names">
+         <!-- For loop logic of jinja template -->
+         {%for k, conc in content.items()%} 
+             <button class="button-48" id="c_name_{{k}}" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc["clean_name"]}}</span></button>
+         {%endfor%} 
+     </div>
+             
+             
+     <div class="contest_rules" id="contest_rules">
+         {%for k, conc in content.items()%} 
+             <ul class="dropdown-menu" id="secondSel_{{k}}" style="display:none">
+                 <li>{{ conc.get("premio") }}</li>
+                 <li>{{ conc.get("restricciones") }}</li>
+                 <li>{{ conc.get("fecha_de_vencimiento") }}</li>
+                 <li>{{ conc.get("extension") }}</li>
+             </ul>
+         {%endfor%} 
+     </div>
+     
+    <form method="post" id="generate_story">
+        <input type="hidden" id="select_contest_form" name="select_contest_form" value="0">
+        <textarea id="story_addons_form" name="story_addons_form" placeholder="Por ejemplo: Que los protagonistas sean dos patos que van en bicicleta" required></textarea>
+        <br>
+        <button class="button-53" id="button4change" role="button" type="submit" value="submit">Enviar</button>
+    </form>
+    
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
+    
     <script type="text/javascript">
         
         function toggle_details(clicked_button) {
             for (i of Array(100).keys()){
                 if ($('#secondSel_'+i).length > 0) {
                   $('#secondSel_'+i).hide();
+                  $('#c_name_'+i).css("background-color","#FFFFFF")
                 }
             
             } 
@@ -46,11 +54,13 @@
             
             if ($('#secondSel_'+cid).length > 0){
                 $('#secondSel_'+cid).show();
+                $('#c_name_'+cid).css("background-color","red");
+                $('#select_contest_form').attr("value", cid);
             }
         };
-        
-        toggle_details()
 
+        
+    
     </script>
 
 </body>

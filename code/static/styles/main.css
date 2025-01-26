@@ -21,6 +21,10 @@ html {
     background-image: url('../rules_backimg.jpeg');
 }
 
+.cuento_page {
+    background-image: url('../story_backimg.png');
+}
+
 
 body {
   align-items: center;
@@ -237,5 +241,12 @@ form {
 
 .contest_rules {
     background-color: green;
-
 }
+
+
+
+.story {
+    position: absolute;
+    margin: 1em;
+}
+

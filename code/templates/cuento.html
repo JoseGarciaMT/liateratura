@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" class="cuento_page">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equic="X-UA-Compatible" content="ie=edge">
+    <title>liateratura</title>
+    <link rel='icon' href='/static/feather_icon.png' type='image/png' >
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/main.css') }}">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16808012795"></script>
+</head>	    
+
+	
+<body>
+    <div class="story" id="story">
+        <div class="story_title" id="story_title">
+            {{content.title}}
+        </div>
+        <div class="story_corpus" id="story_corpus">
+            {{content.story}}
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        
+    </script>
+
+</body>
+</html>

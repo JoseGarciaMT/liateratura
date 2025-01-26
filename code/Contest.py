@@ -24,6 +24,7 @@ from tqdm import tqdm
 
 from DatabaseConnector import _read_file, _write_file
     
+
 class Contest:
     
     def __init__(self, root_path):
@@ -44,7 +45,6 @@ class Contest:
         self.prompts = dict(zip(prompts_df.tipo, prompts_df.prompt))
 
         self.chatGPT = ChatGPT()
-
 
 
     def _get_proxies(self, url):
@@ -232,7 +232,6 @@ class Contest:
     
         return input_params
             
-        
     
     def rules_dict_cleaner(self, input_params):
         output_dict = {}
@@ -266,7 +265,6 @@ class Contest:
         return cleaned_params
 
 
-
     def get_ruled_contests(self):
                 
         if not self.final_bases:
@@ -293,6 +291,7 @@ class Contest:
         return self
     
     
+
     
     # def submit_story(self, gdriver, story, author):
     #     story.generate_file(gdriver, self.formatting)

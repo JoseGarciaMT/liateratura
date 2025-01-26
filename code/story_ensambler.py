@@ -25,7 +25,6 @@ from Contest import Contest
 
 
 
-    
 def generate_chatgpt_story(input_params):
 
     story = chatGPT.query_blank_slate(prompts.get("extraer_cuento").format(**input_params), model="gpt-4o-mini")
@@ -42,17 +41,17 @@ def generate_chatgpt_story(input_params):
     rex_cleaner = regex.compile("(^\W*(((Claro|Por\ssupuesto|A\scontinuación)\,\s)?(aquí\stienes|puedo\s\w+|te\spresento\s\w+)[^\.]+)?(t\wtulo)?\W+|[\n\s]+$)", regex.I)
 
     story_title = regex.sub(r"(^\W+|\W+$)", "", regex.search(r"(?<=^\W*(t\wtulo|\w+\:)\W+)[^\n]+", story, regex.I).group()) if regex.search(r"(?<=^\W*(t\wtulo|\w+\:)\W+)[^\n]+", story, regex.I) else ""
-    input_params["final_story"] = regex.sub(rex_cleaner, "", 
+    input_params["final_story"] = regex.sub(r"^\W+", "", regex.sub(rex_cleaner, "", 
                                             regex.sub(regex.compile(regex.escape(story_title)), "", 
                                                       regex.sub(r"(?<=\W)[\#\*]+Fin\W*$", "", 
                                                                 regex.sub(final_comments_re1, "", 
-                                                                          regex.sub(final_comments_re, "", story))))).strip()
+                                                                          regex.sub(final_comments_re, "", story)))))).strip()
     
-    input_params["final_story_title"] = regex.sub(r"(^\W*|\W*$)", "", story_title)
+    input_params["final_story_title"] = story_title
 
     return input_params
-        
     
+
 
 if __name__ == "__main__":
     
@@ -68,62 +67,19 @@ if __name__ == "__main__":
     ## VARS
     url = "https://www.escritores.org/concursos/concursos-1/concursos-cuento-relato"
 
-    # prompts_df = _read_file(prompts_path)
-    # prompts = dict(zip(prompts_df.tipo, prompts_df.prompt))
+    prompts_df = _read_file(prompts_path)
+    prompts = dict(zip(prompts_df.tipo, prompts_df.prompt))
     
     story_addons_df = _read_file(story_addons_path).reset_index()
     story_addons = dict(zip(story_addons_df.idx, story_addons_df.story_addons))
 
-    # chatGPT = ChatGPT()
+    chatGPT = ChatGPT()
     contest = Contest(root_path)
     restriction_cond = "Soy una madrileña de 36 años que vive en Valencia."
 
     contest.get_ruled_contests()
     
-    
-    # if os.path.exists(accepted_contests_path):
-    #     accepted_contests = _read_file(accepted_contests_path)
-    # else:
-    #     print("\nAsking ChatGPT if we can participate in each available contest...\n")
-    #     n_contests=5
-    #     n = 0
-    #     accepted_contests = {}
-    #     for k, input_params in contest.final_bases.items(): 
-    #         query_params = {}
-    #         query_params["bases"] = input_params
-    #         if regex.search(r"\@", input_params.get("direccion_de_envio")):
-    #             query_params["restricting_cond"] = restriction_cond
-    #             input_params["chatgpt_restrictions"] = chatGPT.query_blank_slate(prompts.get("concurso_permitido").format(**query_params), model="gpt-4o-mini")
-    #             cond0 = regex.search(r"(^No|(desafortunada|lamentable|desgraciada)mente|por\sdesgracia|no\scumpl((ir)?ías|[ae]s))", input_params["chatgpt_restrictions"], regex.I)
-    #             if not cond0:
-    #                 accepted_contests[k] = input_params
-    #                 if n > n_contests:
-    #                     break
-    #                 n += 1
-            
-    #     _write_file(accepted_contests, accepted_contests_path)
-       
-        
-    # story = Story()
-        
-    # print("\nQuerying ChatGPT for the story...\n")
-    # story_addons1 = story_addons.get(random.choice(range(1, len(story_addons)+1)))
-    # verbose = True    
-
-    # selected_contest = random.choice(list(accepted_contests.keys()))
-    # input_params = {}
-    # input_params["bases"] = accepted_contests.get(selected_contest)
-    # input_params["story_addons"] = story_addons1
-
-    # final_response = generate_chatgpt_story(input_params)
-    
-    # print("\n", final_response.get("story_addons"), "\n\n")
-    # print("\n", final_response.get("bases").get("extension"), "\n\n")
-    # print("\n", final_response.get("bases").get("tema"), "\n\n")
-    # print("\n", final_response.get("final_story_title"), "\n")
-    # print("\n", final_response.get("final_story"), "\n\n")
-    
-    n_contests = 60
+    n_contests = 3
     n = 0
     accepted_contests = []
     for k, input_params in contest.final_bases.items(): 
@@ -144,10 +100,30 @@ if __name__ == "__main__":
                     break
                 n += 1
         
-        
     content = {k: v for k, v in contest.final_bases.items() if k in accepted_contests}
 
-    pprint(content)
+    # pprint(content)
+        
+    # story = Story()
+        
+    print("\nQuerying ChatGPT for the story...\n")
+    story_addons1 = story_addons.get(random.choice(range(1, len(story_addons)+1)))
+    verbose = True    
+
+    selected_contest = random.choice(list(content.keys()))
+    input_params = {}
+    input_params["bases"] = content.get(selected_contest)
+    input_params["story_addons"] = story_addons1
+
+    final_response = generate_chatgpt_story(input_params)
+    
+    print("\n", final_response.get("story_addons"), "\n\n")
+    print("\n", final_response.get("bases").get("extension"), "\n\n")
+    print("\n", final_response.get("bases").get("tema"), "\n\n")
+    print("\n", final_response.get("final_story_title"), "\n")
+    print("\n", final_response.get("final_story"), "\n\n")
+    
+
     # # if input_params.get("bases")
     # # story = final_response.get("final_story")
     # extension = final_response.get("bases").get("extension", final_response.get("bases").get("extensión"))

@@ -41,6 +41,7 @@ naked_bases_path = os.path.join(root_path, "data", "naked_bases.pkl")
 bases_path = os.path.join(root_path, "data", "users", "all_rules.pkl")
 accepted_contests_path = os.path.join(root_path, "data", "users", "user_rules.pkl")
 
+
 ## VARS
 url = "https://www.escritores.org/concursos/concursos-1/concursos-cuento-relato"
 
@@ -58,12 +59,41 @@ paths = {
          }
 
 
-
 save_class = False
 verbose = False
 color_codes_wanted = {"human":"#9828bd", "chatgpt":"#ffcc33"}
 
 chatGPT = ChatGPT()
+
+contest = Contest(root_path)
+contest.get_ruled_contests()
+
+
+def generate_chatgpt_story(input_params):
+
+    story = chatGPT.query_blank_slate(prompts.get("extraer_cuento").format(**input_params), model="gpt-4o-mini")
+              
+    cond1 = len(regex.findall(r"(\*{2,}[A-Z]\w*(\s\w+){,2}\:?\*{2,})|(\#+\s?[A-Z]\w+\:)", story)) <= 3
+    cond2 = len(regex.findall(r"[\#\*]{2,}\s?(sinopsis|introducci\wn|desenlace|conclusi\wn|estructura|desarrollo|cl\wmax)", story, regex.I)) <= 2
+    cond3 = len(regex.findall(r"[\#\*]{2,}\s?(parte|cap\wtulo|[ivx]+)\s?\d+", story, regex.I)) <= 3
+    
+    if not (cond1 and cond2 and cond3):
+        story = chatGPT.query_blank_slate(prompts.get("extraer_cuento").format(**input_params), model="gpt-4o-mini")
+        
+    final_comments_re = r"\n\s*(\-{3,}|\W{2,}Fin((al)?\sdel\s([Aa]cto|[cC]uento|[rR]elato))?\W{2,})\s*\n(\W?[\w\s\:\,\:]+[\?\!\.]){1,3}$"
+    final_comments_re1 = r'[\-\#\*]+([lL]as\s)?[fF]rases\s[hH]echas(.|\n){10,800}$'
+    rex_cleaner = regex.compile("(^\W*(((Claro|Por\ssupuesto|A\scontinuación)\,\s)?(aquí\stienes|puedo\s\w+|te\spresento\s\w+)[^\.]+)?(t\wtulo)?\W+|[\n\s]+$)", regex.I)
+
+    story_title = regex.sub(r"(^\W+|\W+$)", "", regex.search(r"(?<=^\W*(t\wtulo|\w+\:)\W+)[^\n]+", story, regex.I).group()) if regex.search(r"(?<=^\W*(t\wtulo|\w+\:)\W+)[^\n]+", story, regex.I) else ""
+    input_params["final_story"] = regex.sub(r"^\W+", "", regex.sub(rex_cleaner, "", 
+                                            regex.sub(regex.compile(regex.escape(story_title)), "", 
+                                                      regex.sub(r"(?<=\W)[\#\*]+Fin\W*$", "", 
+                                                                regex.sub(final_comments_re1, "", 
+                                                                          regex.sub(final_comments_re, "", story)))))).strip()
+    
+    input_params["final_story_title"] = story_title
+
+    return input_params
 
 
 
@@ -80,11 +110,9 @@ def index():
         return redirect(url_for("contests_rules_displayer"))
 
 
+
 @app.route("/concursos", methods=['GET', 'POST'])
 def contests_rules_displayer():
-    
-    contest = Contest(root_path)
-    contest.get_ruled_contests()
     
     if request.method == 'GET': 
         if not "accepted_contests" in session:
@@ -114,10 +142,41 @@ def contests_rules_displayer():
             session["accepted_contests"] = accepted_contests
     
         content = {k: v for k, v in contest.final_bases.items() if k in session["accepted_contests"]}
+        return render_template('concursos.html', content=content)
+        
+    else:
+        session["selected_contest"] = request.form.get('select_contest_form')
+        session["story_addons"] = request.form.get('story_addons_form')
+        return redirect(url_for("story_displayer"))
 
-    return render_template('concursos.html', content=content)
   
+    
+@app.route("/cuento", methods=['GET', 'POST'])
+def story_displayer():
+    
+    if request.method == 'GET': 
+        
+        input_params, content = {}, {}
 
+        # selected_contest = session["selected_contest"]
+        # input_params["story_addons"] = session["story_addons"]
+        selected_contest = 5
+        input_params["story_addons"] = "que vaya sobre un enterrador."
+        input_params["bases"] = contest.final_bases.get(selected_contest)
+        path = os.path.join(root_path, "data", "stories", f"contest_{session['user']}.pkl")
+        if not os.path.exists(path):
+            final_response = generate_chatgpt_story(input_params)
+            _write_file({selected_contest: final_response}, path)
+        else:
+            final_response = _read_file(path)
+        
+        content["title"] = final_response.get("final_story_title")
+        content["story"] = final_response.get("final_story")
+                          
+    return render_template('cuento.html', content=content)
+  
+    
+  
 
 if __name__ == '__main__':
     app.run(debug = True, threaded = False)#, host="0.0.0.0")

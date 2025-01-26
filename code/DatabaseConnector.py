@@ -61,7 +61,7 @@ def _read_file (path):
                 obj = pd.read_csv(path)
             else:
                 obj = pd.read_csv(path, index_col=0)
-        elif file_extension == '.pickle':
+        elif file_extension in ['.pickle', '.pkl']:
             with open(path, 'rb') as f:
                 obj = pickle.load(f)
         elif file_extension == '.joblib':
@@ -95,7 +95,6 @@ def _write_file (obj, path):
         elif file_extension == '.txt':
             with fs.open(path, 'w') as fh:
                 fh.write(obj)
-
         else:
             with fs.open(path, 'wb') as f:
                 pickle.dump(obj, f)

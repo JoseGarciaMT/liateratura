@@ -1,0 +1,241 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+IN:wght@100..400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Patrick+Hand&family=Playwrite+IN:wght@100..400&display=swap');
+
+
+html {
+  background-repeat: no-repeat;
+  background-attachment: fixed; 
+  background-size: 100% 100%;
+  font-family: "Arimo", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.index_page {
+    background-image: url('../frontpage.jpg');
+}
+
+
+.concursos_page {
+    background-image: url('../rules_backimg.jpeg');
+}
+
+
+body {
+  align-items: center;
+  justify-content: center;
+}
+
+.button-52 {
+     font-color: #053972;
+     font-size: 22px;
+     font-family: "Playwrite IN", serif;
+     font-optical-sizing: auto;
+     font-weight: 400;
+     font-style: normal;
+     letter-spacing: 1px;
+     outline: 0;
+     border: 2px solid #053972;
+     cursor: pointer;
+     position: relative;
+     background-color: rgba(0, 0, 0, 0);
+     user-select: none;
+     -webkit-user-select: none;
+     touch-action: manipulation;
+}
+
+.button-52:after {
+  content: "";
+  background-color: #ffe54c;
+  width: 100%;
+  z-index: -1;
+  position: absolute;
+  height: 100%;
+  top: 8px;
+  left: 8px;
+  transition: 0.2s;
+}
+
+.button-52:hover:after {
+  top: 0px;
+  left: 0px;
+}
+
+@media (min-width: 768px) {
+  .button-52 {
+    padding: 12px 30px;
+  }
+}
+
+.join_button {
+  position: absolute;
+  right: 3%;
+  bottom: 3%;
+
+}
+
+form {
+  width: 100%;
+  height: 100%;
+  padding: 1em;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.cond_requester {
+    visibility: hidden;
+    background-color: #fcf6cf; 
+    letter-spacing: 2px;
+    border-radius: 4px;
+    font-size: 1.75em;
+    text-align: justify; 
+    text-justify: inter-word;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    width: 60%;
+    height: 80%;
+    margin: 2.5em;
+    bottom: 5%;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;    
+}
+
+#feed_message {
+    font-size: 16px;
+    position: relative;
+    height: 30%;
+    width: 75%;
+    margin: 25px;
+    padding: 25px;
+    left: 3%;
+    right: 3%;
+}
+
+.restrict_msg{
+    font-family: "Patrick Hand", serif;
+    font-weight: 400;
+    padding: 2em 2em .25em 2em;
+    font-size: 1.2em;
+}
+
+
+/* CSS */
+.button-53 {
+  background-color: #30a7c9;
+  font-size: 22px;
+  font-family: "Playwrite IN", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 1px;
+  text-align: center;
+  border: 0 solid #E5E7EB;
+  box-sizing: border-box;
+  color: white;
+  display: flex;
+  justify-content: center;
+  line-height: 1.75rem;
+  text-align: center;
+  text-decoration: none #000000 solid;
+  text-decoration-thickness: auto;
+  width: 100%;
+  height: 100%;
+  max-width: 150px;
+  max-height: 75px;
+  position: absolute;
+  cursor: pointer;
+  transform: rotate(-2deg);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  left: 40%;
+  right: 40%;
+  margin: 1.2em;
+  padding: 1.2rem 3rem;
+}
+
+.button-53:focus {
+  outline: 0;
+}
+
+.button-53:after {
+  content: '';
+  position: absolute;
+  border: 2px solid #000000;
+  bottom: 5px;
+  left: 5px;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+}
+
+.button-53:hover:after {
+  bottom: 2px;
+  left: 2px;
+}
+
+
+/* CSS */
+.button-48 {
+  appearance: none;
+  background-color: #FFFFFF;
+  border-width: 0;
+  box-sizing: border-box;
+  color: #000000;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Clarkson,Helvetica,sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1em;
+  margin: 0;
+  opacity: 1;
+  outline: 0;
+  padding: 1.5em 2.2em;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-rendering: geometricprecision;
+  text-transform: uppercase;
+  transition: opacity 300ms cubic-bezier(.694, 0, 0.335, 1),background-color 100ms cubic-bezier(.694, 0, 0.335, 1),color 100ms cubic-bezier(.694, 0, 0.335, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.button-48:before {
+  animation: opacityFallbackOut .5s step-end forwards;
+  backface-visibility: hidden;
+  background-color: #EBEBEB;
+  clip-path: polygon(-1% 0, 0 0, -25% 100%, -1% 100%);
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: translateZ(0);
+  transition: clip-path .5s cubic-bezier(.165, 0.84, 0.44, 1), -webkit-clip-path .5s cubic-bezier(.165, 0.84, 0.44, 1);
+  width: 100%;
+}
+
+.button-48:hover:before {
+  animation: opacityFallbackIn 0s step-start forwards;
+  clip-path: polygon(0 0, 101% 0, 101% 101%, 0 101%);
+}
+
+.button-48:after {
+  background-color: #FFFFFF;
+}
+
+.button-48 span {
+  z-index: 1;
+  position: relative;
+}
+
+.contest_rules {
+    background-color: green;
+
+}

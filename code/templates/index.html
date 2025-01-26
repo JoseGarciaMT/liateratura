@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" class="index_page">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equic="X-UA-Compatible" content="ie=edge">
+    <title>liateratura</title>
+    <link rel='icon' href='/static/feather_icon.png' type='image/png' >
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/main.css') }}">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16808012795"></script>
+</head>	    
+
+	
+<body>
+
+    <div class="cond_requester" id="cond_requester">
+        <div class="restrict_msg" id="restrict_msg" >
+                {{content.text | safe}}
+        </div>  
+        <form method="post" id="joining_form">
+            <textarea id="feed_message" name="user_conds" placeholder="Por ejemplo: Soy de Madrid, tengo 36 años y vivo en Valencia, donde me hallo cursando un máster en la Universidad de ídem." required></textarea>
+            <br>
+            <button class="button-53" id="button4change" role="button" type="submit" form="joining_form" value="submit">Enviar</button>
+        </form> 
+    </div>
+    
+    <div class="join_button">
+        <button class="button-52" id="inner_join_button" role="button">Veamos a ver</button>
+    </div>
+    
+    <script type="text/javascript">
+
+       document.getElementById("inner_join_button").onclick = function () {
+           document.getElementById("cond_requester").style.visibility = "visible";
+       };
+       
+    </script>
+
+</body>
+</html>

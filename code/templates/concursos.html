@@ -11,12 +11,13 @@
 
 	
 <body>
-    <select class="contest_names" id="cnames">
+    <div class="contest_names" id="contest_names">
         <!-- For loop logic of jinja template -->
         {%for k, conc in content.items()%} 
-            <option value="{{k}}">{{conc["clean_name"]}}</option>
+            <button class="button-48" id="contest_name_btn" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc["clean_name"]}}</span></button>
         {%endfor%} 
-    </select>
+    </div>
+            
             
     <div class="contest_rules" id="contest_rules">
         {%for k, conc in content.items()%} 
@@ -33,25 +34,25 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script type="text/javascript">
-        var cnames = document.getElementById("cnames");
         
-        function toggle_details() {
+        function toggle_details(clicked_button) {
             for (i of Array(100).keys()){
                 if ($('#secondSel_'+i).length > 0) {
-                  $('#secondSel_'+i).hide()
+                  $('#secondSel_'+i).hide();
                 }
             
             } 
+            var cid = $(clicked_button).attr("data-value");
             
-            if ($('#secondSel_'+cnames.value).length > 0){          
-                $('#secondSel_'+cnames.value).show()
-             }
+            if ($('#secondSel_'+cid).length > 0){
+                $('#secondSel_'+cid).show();
+            }
         };
         
-        cnames.onchange = toggle_details;
-        toggle_details();
+        toggle_details()
 
     </script>
 
 </body>
 </html>
+

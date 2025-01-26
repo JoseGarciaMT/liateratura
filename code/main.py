@@ -20,7 +20,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 
 import uuid
 import time
-from datetime import datetime
+from datetime import datetime as dt
 
 from google.cloud import storage
 
@@ -97,13 +97,19 @@ def contests_rules_displayer():
                 query_params["bases"] = input_params
                 if input_params.get("direccion_de_envio") and regex.search(r"\@", input_params.get("direccion_de_envio")):
                     query_params["restricting_cond"] = restriction_cond
-                    chatgpt_restrictions = chatGPT.query_blank_slate(prompts.get("concurso_permitido").format(**query_params), model="gpt-4o-mini")
-                    cond0 = regex.search(r"(^No|(desafortunada|lamentable|desgraciada)mente|por\sdesgracia|no\scumpl((ir)?ías|[ae]s?))", chatgpt_restrictions, regex.I)
-                    if not cond0:
-                        accepted_contests.append(k)
-                        if n >= n_contests-1:
-                            break
-                        n += 1
+                    cond_sending_add = input_params.get("direccion_de_envio") and regex.search(r"\@", input_params.get("direccion_de_envio"))
+                    date_date = dt.strptime(input_params.get("date"), '%d:%m:%Y').date()
+                    fecha_date = dt.strptime(regex.sub(r"[\-\/]", ":", input_params.get("fecha_de_vencimiento")), '%d:%m:%Y').date()
+                    final_date = max(fecha_date, date_date)
+                    cond_date = dt.now().date() < final_date
+                    if cond_sending_add and cond_date:
+                        chatgpt_restrictions = chatGPT.query_blank_slate(prompts.get("concurso_permitido").format(**query_params), model="gpt-4o-mini")
+                        cond0 = regex.search(r"(^No|(desafortunada|lamentable|desgraciada)mente|por\sdesgracia|no\scumpl((ir)?ías|[ae]s?))", chatgpt_restrictions, regex.I)
+                        if not cond0:
+                            accepted_contests.append(k)
+                            if n >= n_contests-1:
+                                break
+                            n += 1
                         
             session["accepted_contests"] = accepted_contests
     

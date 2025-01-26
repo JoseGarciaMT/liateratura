@@ -32,22 +32,22 @@ class Contest:
         self.url = "https://www.escritores.org/concursos/concursos-1/concursos-cuento-relato"
         self.root_path = root_path
         self.data_path = os.path.join(root_path, "data", "available_contests0.csv")
-        self.prompts_path = os.path.join(root_path, "data", "utils", "prompts.csv")
-        self.story_addons_path = os.path.join(root_path, "data", "utils", "story_addons.csv")
         self.naked_bases_path = os.path.join(root_path, "data", "naked_bases.pkl")
         self.bases_path = os.path.join(root_path, "data", "users", "all_rules.pkl")
         self.accepted_contests_path = os.path.join(root_path, "data", "users", "user_rules.pkl")
         
         self.final_bases = None
         self.naked_bases = None
-        self.prompts = None
-        self.story_addons = None
+        
+        prompts_path = os.path.join(root_path, "data", "utils", "prompts.csv")
+        prompts_df = _read_file(prompts_path)
+        self.prompts = dict(zip(prompts_df.tipo, prompts_df.prompt))
 
         self.chatGPT = ChatGPT()
 
 
 
-    def _get_proxies(url):
+    def _get_proxies(self, url):
            """
            Function meant to provide different proxies 
            to scrape the website of the url provided as input.
@@ -75,7 +75,9 @@ class Contest:
            return r_obj
       
 
-    def relevant_info_retriever(mini_soup, raw0):
+    def relevant_info_retriever(self, mini_soup):
+        
+        raw0 = mini_soup.getText()
         
         concursos_dict_n = {}
         content_end = regex.search(r"BASES[IVX\W\:]*", raw0).start()
@@ -144,6 +146,7 @@ class Contest:
             leng_alter = leng_alter0[0][0] if leng_alter0 else "N/A"
     
         concursos_dict_n["nombre"] = name
+        concursos_dict_n["raw"] = raw2
         concursos_dict_n["fecha de vencimiento"] = expiration_date
         concursos_dict_n["envío por email"] = via_mail
         concursos_dict_n["dirección de envío"] = sending_address
@@ -201,8 +204,8 @@ class Contest:
                     if resp0:
                         mini_soup = bs(resp0.content, "html.parser")
                         # Cleaning string
-                        input_params["raw"] = mini_soup.getText()
-                        input_params["regex_out"] = self.relevant_info_retriever(mini_soup, input_params["raw"])  
+                        input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
+                        input_params["raw"] = input_params["regex_out"].pop("raw")
                         input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
                         self.naked_bases[n] = input_params
                         
@@ -229,16 +232,42 @@ class Contest:
     
         return input_params
             
-    
-    def get_ruled_contests(self):
         
-        if not (self.prompts or self.story_addons):
-            prompts_df = _read_file(self.prompts_path)
-            self.prompts = dict(zip(prompts_df.tipo, prompts_df.prompt))
-            
-            story_addons_df = _read_file(self.story_addons_path).reset_index()
-            self.story_addons = dict(zip(story_addons_df.idx, story_addons_df.story_addons))
+    
+    def rules_dict_cleaner(self, input_params):
+        output_dict = {}
+        for k, v in input_params.items():
+            key = unidecode(k)
+            if (k != "raw" and isinstance(v, str) or isinstance(v, bool)):
+                output_dict[key] = v
+            elif isinstance(v, dict) and regex.search(r"bases|regex_out", k):
+                for k1, v1 in v.items():
+                    output_dict[f"{key}_"+unidecode(regex.sub(r"\s", "_", k1))] = v1
+        
+        clean_name0 = sorted([e for e in set([input_params.get("nombre"), input_params.get("name")]) if e], key=len)[0]
+        output_dict["clean_name"] = regex.sub(r"\s\([A-Z]\w+.*$", "", regex.sub(r"[\\\/]+", "", clean_name0))
+                    
+        ucols = [e for e in set(list(map(lambda x: regex.sub(r"^(regex_out|bases)_", "", x) if regex.search(r"^(regex_out|bases)_", x) else None, output_dict.keys()))) if e]
+        
+        cleaned_params = {}
+        for col in ucols:
+            similar_info = [e for e in output_dict.keys() if regex.search(col, e) and output_dict.get(e)]
+            if similar_info:
+                if len(similar_info) == 2:
+                    both_opts = [e for e in (output_dict.get(similar_info[0]).strip(), output_dict.get(similar_info[1]).strip()) if e and len(e)>1]
+                    final_val = sorted(list(set(both_opts)), key=len)[0]
+                else:
+                    final_val = output_dict.get(similar_info[0]).strip()
+                cleaned_params[col] = final_val 
+    
+        not_double_entries = {key: regex.sub(u"\xa0", "", v) for key, v in output_dict.items() if isinstance(v, str) and not regex.search(r"^(raw|regex|bases|nombre|name|has_|allows_mail)", key)}
+        cleaned_params.update(not_double_entries)
+        
+        return cleaned_params
 
+
+
+    def get_ruled_contests(self):
                 
         if not self.final_bases:
             if os.path.exists(self.bases_path):
@@ -255,30 +284,9 @@ class Contest:
                     print("\nAsking ChatGPT for the rules of each contest...\n")
                     self.final_bases = {}
                     for ncontest, input_params in self.naked_bases.items():            
-                        input_params = self.generate_chatgpt_story_rules(input_params)
-                        output_dict = {}
-                        for k, v in input_params.items():
-                            key = unidecode(k)
-                            if (k != "raw" and isinstance(v, str) or isinstance(v, bool)):
-                                output_dict[key] = v
-                            elif isinstance(v, dict) and regex.search(r"bases|regex_out", k):
-                                for k1, v1 in v.items():
-                                    output_dict[f"{key}_"+unidecode(regex.sub(r"\s", "_", k1))] = v1
-                        
-                        clean_name0 = sorted([e for e in set([input_params.get("nombre"), input_params.get("name")]) if e], key=len)[0]
-                        output_dict["clean_name"] = regex.sub(r"\s\([A-Z]\w+.*$", "", regex.sub(r"[\\\/]+", "", clean_name0))
-                                    
-                        ucols = [e for e in set(list(map(lambda x: regex.sub(r"^(regex_out|bases)_", "", x) if regex.search(r"^(regex_out|bases)_", x) else None, output_dict.keys()))) if e]
-                        
-                        final_df_dict = {}
-                        for col in ucols:
-                            similar_info = [e for e in output_dict.keys() if regex.search(col, e) and output_dict.get(e)]
-                            if similar_info:
-                                final_df_dict[col] = sorted(list(set([output_dict.get(similar_info[0]).strip(), output_dict.get(similar_info[1]).strip()])), key=len)[-1] if len(similar_info) == 2 else output_dict.get(similar_info[0]).strip()
-            
-                        not_double_entries = {key: regex.sub(u"\xa0", "", v) for key, v in output_dict.items() if isinstance(v, str) and not regex.search(r"^(raw|regex|bases|nombre|name|has_|allows_mail)", key)}
-                        final_df_dict.update(not_double_entries)
-                        self.final_bases[ncontest] = final_df_dict
+                        input_params1 = self.generate_chatgpt_story_rules(input_params)
+                        cleaned_params = self.rules_dict_cleaner(input_params1)
+                        self.final_bases[ncontest] = cleaned_params
                     
                     _write_file(self.final_bases, self.bases_path)
             

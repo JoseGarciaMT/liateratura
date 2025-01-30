@@ -8,59 +8,74 @@
     <link rel='icon' href='/static/feather_icon.png' type='image/png' >
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/main.css') }}">
 </head>	    
-
 	
 <body>
-     <div class="contest_names" id="contest_names">
-         <!-- For loop logic of jinja template -->
-         {%for k, conc in content.items()%} 
-             <button class="button-48" id="c_name_{{k}}" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc["clean_name"]}}</span></button>
-         {%endfor%} 
+    <div id="loading" class="loading"><h1 id="loading_title" class="loading_title">La IA, pensando muy fuerte....</h1></div>
+     <div class="contest_wrapper" id="contest_chooser">
+         <h1>Elige el concurso en el que te gustaría participar</h1>
+          <div class="contest_chooser" id="contest_chooser">
+             <div class="contest_names" id="contest_names">
+                 <!-- For loop logic of jinja template -->
+                 {%for k, conc in content.items()%} 
+                     <button class="button-48" id="c_name_{{k}}" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc.clean_name}}</span></button>
+                 {%endfor%} 
+             </div>
+            <div class="contest_rules" id="contest_rules" style="display:none">
+             {%for k, conc in content.items()%} 
+                <ul class="dropdown-menu" id="secondSel_{{k}}" style="display:none">         
+                    {%for ik, iconc in conc['rules'].items()%} 
+                        {% if "Url" == ik %} 
+                            <li><a href={{iconc}} target="_blank"><strong>Enlace a la página en la que se anuncia el concurso</strong></a></li>
+                        {% else %}
+                            <li><strong>{{ik}}</strong>:    {{iconc}}</li>
+                        {% endif %}
+                    {%endfor%} 
+                </ul>
+            {%endfor%}
+            </div>
+        </div>
+
+        <form method="post" class="generate_story" id="generate_story" onsubmit="trigger()">
+            <h2>Añádele más chicha a tu historia (si te da por ahí)</h1>
+            <label for="browser">También me gustaría que </label>
+            <input type="hidden" id="select_contest_form" name="select_contest_form" value="0">
+            <input type="search" list="addons_opts" name="story_addons_form" id="story_addons_form" autocomplete="off">
+            <datalist id="addons_opts">
+                {%for stadd in story_addons%} 
+                    <option value="{{stadd}}">
+                {%endfor%} 
+            </datalist>
+            <button class="button-51" id="button4change" role="button" type="submit" value="submit">Enviar</button>
+        </form>
      </div>
-             
-             
-     <div class="contest_rules" id="contest_rules">
-         {%for k, conc in content.items()%} 
-             <ul class="dropdown-menu" id="secondSel_{{k}}" style="display:none">
-                 <li>{{ conc.get("premio") }}</li>
-                 <li>{{ conc.get("restricciones") }}</li>
-                 <li>{{ conc.get("fecha_de_vencimiento") }}</li>
-                 <li>{{ conc.get("extension") }}</li>
-             </ul>
-         {%endfor%} 
-     </div>
-     
-    <form method="post" id="generate_story">
-        <input type="hidden" id="select_contest_form" name="select_contest_form" value="0">
-        <textarea id="story_addons_form" name="story_addons_form" placeholder="Por ejemplo: Que los protagonistas sean dos patos que van en bicicleta" required></textarea>
-        <br>
-        <button class="button-53" id="button4change" role="button" type="submit" value="submit">Enviar</button>
-    </form>
-    
-    
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
     <script type="text/javascript">
         
         function toggle_details(clicked_button) {
             for (i of Array(100).keys()){
                 if ($('#secondSel_'+i).length > 0) {
                   $('#secondSel_'+i).hide();
-                  $('#c_name_'+i).css("background-color","#FFFFFF")
+                  $('#c_name_'+i).css("background-color","white")
                 }
-            
             } 
             var cid = $(clicked_button).attr("data-value");
             
             if ($('#secondSel_'+cid).length > 0){
+                $('#contest_rules').show();
                 $('#secondSel_'+cid).show();
-                $('#c_name_'+cid).css("background-color","red");
+                $('#c_name_'+cid).css("background-color","#b1d6e655");
                 $('#select_contest_form').attr("value", cid);
             }
         };
-
+                 
+        function trigger(){
+            document.getElementById("button4change").style.display = "none";
+            document.getElementById("loading").style.display = "block"; 
+        }; 
         
-    
+        
+
     </script>
 
 </body>

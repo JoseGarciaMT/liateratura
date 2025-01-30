@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Mono&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+IN:wght@100..400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Patrick+Hand&family=Playwrite+IN:wght@100..400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Ephesis&family=Noto+Sans+Mono:wght@100..900&family=Patrick+Hand&family=Playwrite+IN:wght@100..400&display=swap');
 
 
 html {
@@ -29,6 +28,28 @@ html {
 body {
   align-items: center;
   justify-content: center;
+}
+
+a {
+  color: #234370;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #1b9ccf;
+}
+
+a:active {
+  color: #5210b5;
+}
+
+.loading {
+    background: #FFFFFF95 url('../chaplin.gif') no-repeat center center;
+    display: none;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 9999999;
 }
 
 .button-52 {
@@ -87,6 +108,11 @@ form {
   display: inline-block;
 }
 
+
+li + li {
+    margin-top: .5em;
+}
+
 .cond_requester {
     visibility: hidden;
     background-color: #fcf6cf; 
@@ -97,33 +123,49 @@ form {
     text-justify: inter-word;
     align-items: center;
     justify-content: center;
+    justify-items: center;
     position: absolute;
-    width: 60%;
-    height: 80%;
-    margin: 2.5em;
-    bottom: 5%;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    width: 55%;
+    height: 85%;
+    margin: 1em 2.5em;
+    padding: .5em 3em 1em 3em;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;    
 }
 
 #feed_message {
     font-size: 16px;
     position: relative;
-    height: 30%;
-    width: 75%;
-    margin: 25px;
+    height: 100%;
+    width: 100%;
     padding: 25px;
-    left: 3%;
-    right: 3%;
 }
 
-.restrict_msg{
+.restrict_msg {
+    position: relative;
+    grid-row: 1;
     font-family: "Patrick Hand", serif;
     font-weight: 400;
-    padding: 2em 2em .25em 2em;
     font-size: 1.2em;
+    text-align: center;
 }
 
+.restrict_msg_exp {
+    position: relative;
+    color: 	#606060;
+    font-weight: 200;
+    font-size: .8em;
+    padding: 0.5em 1em 0em 1em;
+}
 
+.joining_form {
+    position: relative;
+    grid-row: 2 / -1;
+    display: flex;
+    justify-content: center;
+}
+ 
 /* CSS */
 .button-53 {
   background-color: #30a7c9;
@@ -140,7 +182,6 @@ form {
   display: flex;
   justify-content: center;
   line-height: 1.75rem;
-  text-align: center;
   text-decoration: none #000000 solid;
   text-decoration-thickness: auto;
   width: 100%;
@@ -188,7 +229,6 @@ form {
   color: #000000;
   cursor: pointer;
   display: inline-block;
-  font-family: Clarkson,Helvetica,sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0;
@@ -197,6 +237,7 @@ form {
   opacity: 1;
   outline: 0;
   padding: 1.5em 2.2em;
+  margin: .75em;
   position: relative;
   text-align: center;
   text-decoration: none;
@@ -231,7 +272,7 @@ form {
 }
 
 .button-48:after {
-  background-color: #FFFFFF;
+  background-color: #b1d6e655;
 }
 
 .button-48 span {
@@ -239,14 +280,271 @@ form {
   position: relative;
 }
 
-.contest_rules {
-    background-color: green;
+
+/* CSS */
+.button-51 {
+  background-color: transparent;
+  border: 2px solid #266DB6;
+  margin: 0em 1em;
+  box-sizing: border-box;
+  color: #00132C;
+  font-family: "Playwrite IN", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 16px 23px;
+  position: relative;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-51:hover,
+.button-51:active {
+  outline: 0;
+}
+
+.button-51:hover {
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.button-51:before {
+  background-color: #D5EDF6;
+  content: "";
+  height: calc(100% + 3px);
+  position: absolute;
+  right: -7px;
+  top: -9px;
+  transition: background-color 300ms ease-in;
+  width: 100%;
+  z-index: -1;
+}
+
+.button-51:hover:before {
+  background-color: #6DCFF6;
+}
+
+@media (min-width: 768px) {
+  .button-51 {
+    padding: 16px 32px;
+  }
 }
 
 
+h1, h2 {
+    font-family: "Patrick Hand", serif;
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.loading_title {
+    position: relative;
+    top: 12%;
+    background-color: white;
+    border-radius: 1%;
+    padding: 1em;
+    }
+    
+.contest_wrapper {
+    position: absolute;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    row-gap: 1vh;
+}
+
+
+.contest_chooser {
+    position: relative;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: auto auto;
+    margin: 1em 2em;
+    row-gap: 1vw;
+}
+
+
+h1 {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    font-size: 2.8em;
+
+}
+
+.contest_names {
+    grid-column: 1;
+}
+
+.contest_rules {
+    grid-column: 2;
+    background-color: #FFFFFF50;
+    padding: 1em;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+}
+
+.generate_story {
+    grid-row: 3;
+    background-color: #b1d6e690;
+    border-radius: 3px;
+}
+
+
+.page_wrapper {
+    display: inline-grid;
+    grid-template-rows: auto auto;
+    }
+    
+.page_container {
+    position: relative;
+}
 
 .story {
-    position: absolute;
-    margin: 1em;
+    grid-row: 1;
+    margin: 0em 20.5vw 1em 20.5vw;
 }
 
+
+.story_title {
+    position: relative;
+    display: inline-block;
+    font-family: "Ephesis", serif;
+    letter-spacing: 2px;
+    font-weight: 400;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    }
+
+.story_corpus {
+    position: relative;
+    display: inline-block;
+    font-family: "Noto Sans Mono", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: 14px;
+    text-align: justify; 
+    text-justify: inter-word;
+    align-items: center;
+    justify-content: center;
+}
+
+blockquote { 
+    max-height: 60vh; 
+    overflow: scroll;
+     }
+
+#raw_story { 
+    padding: 0.5em 1.7em;
+     }
+     
+.next_options {
+    display: grid;
+    grid-row: 2;
+    grid-template-columns: auto auto auto;
+    z-index: 1;
+    grid-gap: 3%;
+    margin: 0vw 27vw;
+    }
+
+
+input[type=search] {
+    background: white;
+    color: black;
+    border: 1px solid #DDD;
+    border-radius: 1px;
+    box-shadow: 0 0 3px #DDD inset;
+    color: #666;
+    padding: 5px 10px;
+    width: 65%;
+    height: 50px;
+    outline: none;
+    font-size: 17px;
+    font-family: "Arimo", serif;
+    }
+    
+label {
+    font-size: 17px;
+}
+
+.cont_story_rules {
+    display: none;
+    background-color: white;
+    position: absolute;
+    top: 17%;
+    left: 1%;
+    width: 22%;
+    padding: .5em;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+}
+
+.truchicard {
+    display: none;
+    position: absolute;
+    bottom: 0%;
+    right: 5%;
+    perspective: 1000px;
+    }
+    
+.flip-box {
+  background-color: transparent;
+  width: 350px;
+  height: 230px;
+  perspective: 1000px;
+}
+
+
+.flip-box-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  display: grid;
+  grid-template-rows: auto auto;
+}
+
+.flip-box:hover .flip-box-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-box-front, .flip-box-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.flip-box-front {
+  background-color: #bbb;
+  color: black;
+}
+
+.flip-box-back {
+  background-color: #555;
+  color: white;
+  transform: rotateY(180deg);
+}
+
+
+
+.salida_ex {
+    position: absolute;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    bottom: 5%;
+    left: 4%;
+    background-color: #fce1e190;
+    border-radius: 50%;
+    box-shadow: 0 0 25px 15px #fce1e190;
+    transform: translateX(0px);
+}
+
+.salida_ex:hover {
+    transform: translateX(-15px);
+}

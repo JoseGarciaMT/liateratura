@@ -16,6 +16,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 import os, regex
 import random
+from datetime import datetime as dt
+
 from lxml.html import fromstring
 from unidecode import unidecode
 import time
@@ -32,7 +34,6 @@ class Contest:
         self.contest_uuid = uuid.uuid4()
         self.url = "https://www.escritores.org/concursos/concursos-1/concursos-cuento-relato"
         self.root_path = root_path
-        self.data_path = os.path.join(root_path, "data", "available_contests0.csv")
         self.naked_bases_path = os.path.join(root_path, "data", "naked_bases.pkl")
         self.bases_path = os.path.join(root_path, "data", "users", "all_rules.pkl")
         self.accepted_contests_path = os.path.join(root_path, "data", "users", "user_rules.pkl")
@@ -94,7 +95,7 @@ class Contest:
         country = regex.findall(r"(?<=País\sde\sla\sentidad\sconvocante\:\W*)([A-Z]\w[\W\w]+)(?=Participación\spor\smedios\selectrónicos\:)|(?=Fecha\sde\scierre\:)", raw)[0].strip()
         via_mail0 = regex.findall(r"(?<=Participación\spor\smedios\selectrónicos\:\W*)([sS]í|[nN]o)(?=Fecha\sde\scierre\:)", raw)
         via_mail = via_mail0[0].strip() if via_mail0 else "N/A"
-        expiration_date = regex.findall(r"(?<=Fecha\sde\scierre\:\W*)((\d+\:){2}\d+)", raw)[0][0].strip()
+        expiration_date = regex.findall(r"(?<=Fecha\sde\scierre\:\W*)((\d+\W){2}\d+)", raw)[0][0].strip()
     
         raw1 = ". ".join([div.text for div in mini_soup.find_all("p") if div.text and not div.text == '\xa0'])
         content_start = regex.search(r"\.\s+BASES[IVX\:]*\.", raw1).end()
@@ -118,15 +119,15 @@ class Contest:
                     clau1 = raw3[prev_clau_i:last_char]
                     if regex.search(r"\b(tem[áa]\w*(?!\sdel\smensaje)|trat(e|ar)\s(sobre|acerca)|reflej|vers(e|ar))\b", clau1, regex.I):
                         tema = regex.sub(r"^\W+", "", clau1)
-                    if regex.findall(r"\b(palabras|folio|líneas|caracteres|extensi[oó]n|longitud)\b", clau1, regex.I):
+                    if regex.search(r"\b(palabras|folio|líneas|caracteres|extensi[oó]n|longitud)\b", clau1, regex.I):
                         extension = clau1
-                    if regex.findall(r"\b(formato|tamaño|letra|interlineado|arial|times\s\new\s\roman)\b", clau1, regex.I):
+                    if regex.search(r"\b(formato|tamaño|letra|interlineado|arial|times\s\new\s\roman)\b", clau1, regex.I):
                         formato = clau1
-                    if regex.findall(r"\b(catalán|eusquera|aragonés|gallego|lenguas\s(co?\-?)?oficiales)\b", clau1, regex.I):
+                    if regex.search(r"\b(catalán|eusquera|aragonés|gallego|lenguas\s(co?\-?)?oficiales)\b", clau1, regex.I):
                         leng_alter = clau1
                     raw3 = raw2[prev_clau_i:]
             else:
-                tema0 = regex.search(r"([^\.]*\W(tem[áa]\w*(?!\sdel\smensaje)|trat(e|ar)\s(sobre|acerca)|reflej|vers(e|ar))[^\.]*)", raw2, regex.I)
+                tema0 = regex.findall(r"([^\.]*\W(tem[áa]\w*(?!\sdel\smensaje)|trat(e|ar)\s(sobre|acerca)|reflej|vers(e|ar))[^\.]*)", raw2, regex.I)
                 tema = tema0[0][0] if tema0 else "N/A"
                 extension0 = regex.findall(r"([^\.]*\W(palabras|folio|líneas|caracteres|extensi[oó]n|longitud)[^\.]*)", raw2, regex.I)
                 extension = extension0[0][0] if extension0 else "N/A"
@@ -136,7 +137,7 @@ class Contest:
                 leng_alter = leng_alter0[0][0] if leng_alter0 else "N/A"
     
         else:
-            tema0 = regex.search(r"([^\.]*\W(tem[áa]\w*(?!\sdel\smensaje)|trat(e|ar)\s(sobre|acerca)|reflej|vers(e|ar))[^\.]*)", raw2, regex.I)
+            tema0 = regex.findall(r"([^\.]*\W(tem[áa]\w*(?!\sdel\smensaje)|trat(e|ar)\s(sobre|acerca)|reflej|vers(e|ar))[^\.]*)", raw2, regex.I)
             tema = tema0[0][0] if tema0 else "N/A"
             extension0 = regex.findall(r"([^\.]*\W(palabras|folio|líneas|caracteres|extensi[oó]n|longitud)[^\.]*)", raw2, regex.I)
             extension = extension0[0][0] if extension0 else "N/A"
@@ -145,20 +146,29 @@ class Contest:
             leng_alter0 = regex.findall(r"([^\.]*\W(catalán|eusquera|aragonés|valenciano|gallego|lenguas\s(co?\-?)?oficiales)[^\.]*)", raw2, regex.I)
             leng_alter = leng_alter0[0][0] if leng_alter0 else "N/A"
     
+        plica0 = regex.findall(r"([^\.]*\Wplica\W[^\.]*)", raw2, regex.I)
+        plica = plica0[0][0] if plica0 else "N/A"
+        
+        
+        dicto_keys = [("fecha de vencimiento", expiration_date),
+                      ("envío por email", via_mail),
+                      ("dirección de envío", sending_address),
+                      ("país convocante", country),
+                      ("fecha de vencimiento", entity),
+                      ("restricciones", restrictions),
+                      ("premio", price),
+                      ("género", gender),
+                      ("tema", tema),
+                      ("extensión", extension),
+                      ("formato", formato),
+                      ("plica", plica),
+                      ("otros idiomas", leng_alter)]
+
         concursos_dict_n["nombre"] = name
         concursos_dict_n["raw"] = raw2
-        concursos_dict_n["fecha de vencimiento"] = expiration_date
-        concursos_dict_n["envío por email"] = via_mail
-        concursos_dict_n["dirección de envío"] = sending_address
-        concursos_dict_n["país convocante"] = country
-        concursos_dict_n["entidad convocante"] = entity
-        concursos_dict_n["restricciones"] = restrictions
-        concursos_dict_n["premio"] = price
-        concursos_dict_n["género"] = gender
-        concursos_dict_n["tema"] = tema
-        concursos_dict_n["extensión"] = extension
-        concursos_dict_n["formato"] = formato
-        concursos_dict_n["otros idiomas"] = leng_alter
+        
+        for key_name, val in dicto_keys:
+            concursos_dict_n[key_name] = regex.sub(r"^\W+|[\n\s]+$", "", val) if isinstance(val, str) else val
     
         return concursos_dict_n
     
@@ -206,6 +216,7 @@ class Contest:
                         # Cleaning string
                         input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
                         input_params["raw"] = input_params["regex_out"].pop("raw")
+                        input_params["url"] = url
                         input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
                         self.naked_bases[n] = input_params
                         
@@ -225,7 +236,7 @@ class Contest:
                       else (end_ch + regex.search(r"\n+", chatgpt_resp_bases[end_ch:]).end() 
                             if regex.search(r"\n+", chatgpt_resp_bases[end_ch:]) else end_ch))
             start_ch = regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases).end() if regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases) else end_ch0
-            concursos_dict[e] = regex.sub(r"^\W+|(,|[^\)\w])+$", "", chatgpt_resp_bases[start_ch: end_ch])
+            concursos_dict[e] = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|[\n\s]*$", "", chatgpt_resp_bases[start_ch: end_ch])
             end_ch0 = end_ch
     
         input_params["bases"] = concursos_dict
@@ -243,25 +254,34 @@ class Contest:
                 for k1, v1 in v.items():
                     output_dict[f"{key}_"+unidecode(regex.sub(r"\s", "_", k1))] = v1
         
-        clean_name0 = sorted([e for e in set([input_params.get("nombre"), input_params.get("name")]) if e], key=len)[0]
+        clean_name0 = sorted([e for e in set([input_params.get("regex_out").get("nombre"), input_params.get("bases").get("nombre"), input_params.get("name")]) if e], key=len)[0]
         output_dict["clean_name"] = regex.sub(r"\s\([A-Z]\w+.*$", "", regex.sub(r"[\\\/]+", "", clean_name0))
-                    
-        ucols = [e for e in set(list(map(lambda x: regex.sub(r"^(regex_out|bases)_", "", x) if regex.search(r"^(regex_out|bases)_", x) else None, output_dict.keys()))) if e]
+        
+        ucols = [e for e in set(list(map(lambda x: regex.sub(r"^(regex_out|bases)_", "", x) if regex.search(r"^(regex_out|bases)_", x) and not regex.search(r"nombre", x) else None, output_dict.keys()))) if e]
         
         cleaned_params = {}
         for col in ucols:
             similar_info = [e for e in output_dict.keys() if regex.search(col, e) and output_dict.get(e)]
             if similar_info:
                 if len(similar_info) == 2:
-                    both_opts = [e for e in (output_dict.get(similar_info[0]).strip(), output_dict.get(similar_info[1]).strip()) if e and len(e)>1]
-                    final_val = sorted(list(set(both_opts)), key=len)[0]
-                else:
-                    final_val = output_dict.get(similar_info[0]).strip()
-                cleaned_params[col] = final_val 
-    
-        not_double_entries = {key: regex.sub(u"\xa0", "", v) for key, v in output_dict.items() if isinstance(v, str) and not regex.search(r"^(raw|regex|bases|nombre|name|has_|allows_mail)", key)}
+                    both_opts = [e for e in (output_dict.get(similar_info[0]).strip(), output_dict.get(similar_info[1]).strip()) if e and len(e)>1 and not regex.search(r"^\W*(n\/a|null|none)\W*$", str(e), regex.I)]
+                    if both_opts:
+                        cleaned_params[col] = sorted(list(set(both_opts)), key=len)[0]
+                elif  len(similar_info) == 1:
+                    cleaned_params[col] = output_dict.get(similar_info[0]).strip()
+
+        date_date = dt.strptime(input_params.get("date"), '%d:%m:%Y').date()
+        try:
+            fecha_date = dt.strptime(regex.sub(r"[\-\/]", ":", cleaned_params.get("fecha_de_vencimiento")), '%d:%m:%Y').date()
+            final_date = max(fecha_date, date_date)
+        except:
+            final_date = date_date
+            
+        cleaned_params["fecha_de_vencimiento"] = final_date
+                
+        not_double_entries = {key: regex.sub(u"\xa0", "", v) for key, v in output_dict.items() if isinstance(v, str) and not regex.search(r"^(raw|regex|bases|date|nombre|name|has_|allows_mail)", key)}
         cleaned_params.update(not_double_entries)
-        
+
         return cleaned_params
 
 
@@ -281,11 +301,14 @@ class Contest:
                     
                     print("\nAsking ChatGPT for the rules of each contest...\n")
                     self.final_bases = {}
-                    for ncontest, input_params in self.naked_bases.items():            
-                        input_params1 = self.generate_chatgpt_story_rules(input_params)
-                        cleaned_params = self.rules_dict_cleaner(input_params1)
-                        self.final_bases[ncontest] = cleaned_params
-                    
+                    self.suspicious_conts = []
+                    for ncontest, input_params in self.naked_bases.items(): 
+                        cond_long_raw = input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
+                        if cond_long_raw:
+                            input_params1 = self.generate_chatgpt_story_rules(input_params)
+                            cleaned_params = self.rules_dict_cleaner(input_params1)
+                            self.final_bases[ncontest] = cleaned_params
+                        
                     _write_file(self.final_bases, self.bases_path)
             
         return self

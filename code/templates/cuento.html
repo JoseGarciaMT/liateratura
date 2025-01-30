@@ -13,19 +13,105 @@
 
 	
 <body>
-    <div class="story" id="story">
-        <div class="story_title" id="story_title">
-            {{content.title}}
+    <div id="loading" class="loading"><h1>La IA, pensando muy fuerte...</h1></div>
+    <div class="page_container" id="page_container">
+        <div class="page_wrapper" id="page_wrapper">
+            <div class="story" id="story">
+                <div class="story_title" id="story_title">
+                    <blockquote contenteditable="true" class="story_title_block" id="story_title_block">
+                        {{content.title}}
+                    </blockquote>
+                </div>
+                
+                <div class="story_corpus" id="story_corpus">
+                    <blockquote contenteditable="true" id="raw_story">
+                        {% autoescape off %}
+                        {{ content.story }}
+                        {% endautoescape %}
+                    </blockquote>
+                </div>
+            </div>
+            <div class="next_options" id="next_options">
+                <button class="button-52" id="rules_button" role="button"  onclick="showElement('cont_story_rules')">Bases</button>
+                <form method="post" class="story_form" id="story_form" onsubmit="getStory()">
+                    <input type="hidden" id="downl_title_form" name="downl_title_form" value="0">
+                    <input type="hidden" id="downl_story_form" name="downl_story_form" value="0">
+                    <button class="button-52" id="download_button" role="button" type="submit" value="submit">Descarga el texto</button>
+                </form>
+                <button class="button-52" id="truchi_btn" role="button" onclick="showElement('truchicard')">Otros proyectos</button>
+            </div>
         </div>
-        <div class="story_corpus" id="story_corpus">
-            {{content.story}}
+        <div class="cont_story_rules" id="cont_story_rules">
+            <ul class="dropdown-menu" id="secondSel_{{k}}">         
+             {%for ik, iconc in content['bases'].items()%} 
+                {% if "Url" == ik %} 
+                    <li><a href={{iconc}} target="_blank"><strong>Enlace</strong></a></li>
+                {% else %}
+                    <li><strong>{{ik}}</strong>:    {{iconc}}</li>
+                {% endif %} 
+             {%endfor%} 
+            </ul>
         </div>
-
+        
+        <div class="truchicard" id="truchicard">
+            <a href="https://www.truchiwoman.es" target="_blank">
+            <div class="flip-box">
+                <div class="flip-box-inner">
+                    <img  class="flip-box-front" src="../static/truchi_front.png" alt="Truchiwoman" width="275px" height="160px">
+                    <img  class="flip-box-back" src="../static/truchi_back.png" alt="Truchiwoman" width="275px" height="160px">
+                </div> 
+            </div>
+            </a>
+        </div>
     </div>
+    <div class="salida_ex" id="salida_ex"> <img src="/static/icono_salida.png" style="width:75px; height:75px;"> </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="text/javascript">
         
-    </script>
+        document.getElementById("salida_ex").onclick = function () {
+            window.location.href = "concursos";
+        };
+        
+
+        function showElement(idname) {
+            var x = document.getElementById(idname);
+            if (x.style.display === "none") {
+                x.style.display = "inline";
+              } else {
+                x.style.display = "none";
+              }
+            }
+
+
+        function getStory() {
+           var story = document.getElementById("raw_story").innerHTML;
+           var title = document.getElementById("story_title_block").innerHTML;
+
+           document.getElementById("downl_story_form").setAttribute("value", story);
+           document.getElementById("downl_title_form").setAttribute("value", title);
+        }
+        
+
+		function downloadCurrentDocument() {
+        		var storyCorpus = $('#raw_story')[0].innerHTML.replaceAll("\<br\>", "\n").trim();
+        		var storyTitle = $('#story_title_block')[0].innerHTML.trim();
+        		var story = storyTitle+"\n\n\n"+storyCorpus;
+        		
+                var element = document.createElement('a');
+                action = new MouseEvent('click');
+                
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + story);
+                element.setAttribute('download', storyTitle+'.txt');
+                element.style.display = 'none';
+                
+                element.dispatchEvent(action);
+                }; 
+        
+        document.getElementById("download_button").addEventListener("click", downloadCurrentDocument);
+
+
+  </script>
 
 </body>
 </html>

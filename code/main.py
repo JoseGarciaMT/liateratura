@@ -20,7 +20,8 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 
 import uuid
 import time
-from datetime import datetime as dt
+import datetime
+from dateutil import parser
 from difflib import SequenceMatcher
 
 from google.cloud import storage
@@ -74,8 +75,9 @@ def chatgpt_restrict_checker(final_bases, restriction_cond, n_contests=10):
     n = 0
     accepted_contests = []
     for k, input_params in final_bases.items(): 
-        cond_sending_add = input_params.get("direccion_de_envio", "") and regex.search(r"(\@|https:\/\/)", input_params.get("direccion_de_envio"))
-        cond_date = dt.now().date() < input_params.get("fecha_de_vencimiento", dt.now().date())
+        cond_sending_add = input_params.get("direccion_de_envio") and regex.search(r"(\@|https:\/\/)", input_params.get("direccion_de_envio"))
+        back2dt = datetime.datetime.strptime(input_params.get("fecha_de_vencimiento"), "%d:%m:%Y").date() if input_params.get("fecha_de_vencimiento") and regex.search(r"(\:\d+){2}", input_params.get("fecha_de_vencimiento")) else datetime.date.today() - datetime.timedelta(days=1)
+        cond_date = datetime.date.today() < back2dt
         cond_extens0 = regex.search(r"novela|compilación|antología", input_params.get("genero"), regex.I) and not regex.search(r"[\,\;]", input_params.get("genero")) if input_params.get("genero") else False 
         cond_extens1 = regex.search(r"([4567890]+|[1230]{2,})\s(p\wgina|folio|cuartilla)s|([67890]|[12345]{2,})[\.\,\s]?000\spalabras", input_params.get("extension"), regex.I) if input_params.get("extension") else False
         cond_extens = cond_extens0 or cond_extens1
@@ -145,21 +147,33 @@ def rules_keys_cleaner(k):
 @app.route("/", methods=['GET', 'POST'])
 def index():
     
-    if request.method == 'GET':  
-        content = {}
-        content["text1"] = "Necesito que enumeres lo que consideres que podría afectar tus posibilidades de poder participar en un concurso literario" 
-        content["text2"] = "(nacionalidad, lugar de residencia, edad, y, en caso de que sea aplicable, centro de estudios en el que estás matriculado):"
-        session["user"] = str(uuid.uuid4())
-        return render_template('index.html', content=content)
-    
+    session['todays_visit'] = datetime.date.today() #+ datetime.timedelta(days=7)
+    if not "user" in session:
+        session['user'] = str(uuid.uuid4())
+        session['last_visit'] = datetime.date.today()
+
+    if isinstance(session["last_visit"], str):
+        last_visit = parser.parse(session["last_visit"]).date()
     else:
-        if request.form.get('joining_form'):
-            restricting_cond0 = regex.sub(r"^\W*|\W*$", "", request.form.get('joining_form'))+"."
-            session["restriction_cond"] = restricting_cond0[0].upper()+restricting_cond0[1:]
-        # elif not "restriction_cond" in session:
+        last_visit = session["last_visit"]
+        
+    difference = session['todays_visit'] - last_visit
+    time_lapse = datetime.timedelta(days=7)
+    
+    if not "restriction_cond" in session or difference >= time_lapse:
+        if request.method == 'GET':  
+            content = {}
+            content["text1"] = "Necesito que enumeres lo que consideres que podría afectar tus posibilidades de poder participar en un concurso literario" 
+            content["text2"] = "(nacionalidad, lugar de residencia, edad, y, en caso de que sea aplicable, centro de estudios en el que estás matriculado):"
+            return render_template('index.html', content=content)
         else:
-            session["restriction_cond"] = "Soy española, mayor de edad y hace tiempo que acabé de cursar todos mis estudios."
+            restricting_cond0 = regex.sub(r"^\W*|[\.\,\;\:\s\n]*$", "", request.form.get('joining_form'))+"."
+            session["restriction_cond"] = restricting_cond0[0].upper()+restricting_cond0[1:]
+            session["last_visit"] = session['todays_visit']
+            return redirect(url_for("contests_rules_displayer"))
+    else:
         return redirect(url_for("contests_rules_displayer"))
+
 
 
 @app.route("/concursos", methods=['GET', 'POST'])
@@ -169,7 +183,19 @@ def contests_rules_displayer():
     story_addons = dict(zip(story_addons_df.idx, story_addons_df.story_addons))
     
     if request.method == 'GET': 
-        if not "accepted_contests" in session:
+        if isinstance(session["last_visit"], str):
+            last_visit = parser.parse(session["last_visit"]).date()
+        else:
+            last_visit = session["last_visit"]
+            
+        if isinstance(session["todays_visit"], str):
+            todays_visit = parser.parse(session["todays_visit"]).date()
+        else:
+            todays_visit = session["todays_visit"]
+            
+        difference = todays_visit - last_visit
+        time_lapse = datetime.timedelta(days=1)
+        if not "accepted_contests" in session or difference >= time_lapse:
             accepted_contests = chatgpt_restrict_checker(contest.final_bases, session["restriction_cond"])
             session["accepted_contests"] = accepted_contests
         
@@ -190,6 +216,7 @@ def contests_rules_displayer():
     else:
         session["selected_contest"] = request.form.get('select_contest_form')
         story_addons_text = regex.sub(r"^\W*|\W*$", "", request.form.get('story_addons_form'))+"."
+        print("\n"+story_addons_text+"\n", file=sys.stderr)
         if len(story_addons_text) > 2:
             story_addons_idx = [k for k, v in story_addons.items() if SequenceMatcher(None, unidecode(story_addons_text), unidecode(v)).ratio() > .88]
             

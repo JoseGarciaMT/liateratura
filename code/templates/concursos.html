@@ -11,15 +11,14 @@
 	
 <body>
     <div id="loading" class="loading"><h1 id="loading_title" class="loading_title">La IA, pensando muy fuerte....</h1></div>
-     <div class="contest_wrapper" id="contest_chooser">
-         <h1>Elige el concurso en el que te gustaría participar</h1>
-          <div class="contest_chooser" id="contest_chooser">
-             <div class="contest_names" id="contest_names">
-                 <!-- For loop logic of jinja template -->
-                 {%for k, conc in content.items()%} 
-                     <button class="button-48" id="c_name_{{k}}" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc.clean_name}}</span></button>
-                 {%endfor%} 
-             </div>
+    <div class="contest_wrapper" id="contest_chooser">
+        <div class="contest_chooser" id="contest_chooser">
+            <h1>Elige el concurso en el que te gustaría participar</h1>
+            <div class="contest_names" id="contest_names">
+                {%for k, conc in content.items()%} 
+                    <button class="button-48" id="c_name_{{k}}" role="button" data-value="{{k}}" onclick=toggle_details(this)><span class="text">{{conc.clean_name}}</span></button>
+                {%endfor%} 
+            </div>
             <div class="contest_rules" id="contest_rules" style="display:none">
              {%for k, conc in content.items()%} 
                 <ul class="dropdown-menu" id="secondSel_{{k}}" style="display:none">         
@@ -39,10 +38,10 @@
             <h2>Añádele más chicha a tu historia (si te da por ahí)</h1>
             <label for="browser">También me gustaría que </label>
             <input type="hidden" id="select_contest_form" name="select_contest_form" value="0">
-            <input type="search" list="addons_opts" name="story_addons_form" id="story_addons_form" autocomplete="off">
+            <input type="text" list="" name="story_addons_form" id="story_addons_form" autocomplete="off">
             <datalist id="addons_opts">
                 {%for stadd in story_addons%} 
-                    <option value="{{stadd}}">
+                    <option value="{{stadd}}">{{stadd}}</option>
                 {%endfor%} 
             </datalist>
             <button class="button-51" id="button4change" role="button" type="submit" value="submit">Enviar</button>
@@ -75,6 +74,74 @@
         }; 
         
         
+        function fancyDropdown(inputId){
+            id = document.getElementById(inputId);
+            datalist = id.nextElementSibling;
+            var minWidth = datalist.offsetWidth;
+            
+        
+            function outputsize(){
+              if (id.offsetWidth < minWidth ){
+                datalist.style.minwidth = id.offsetWidth+'px';
+              }else{
+                datalist.style.width = id.offsetWidth+'px';
+              }
+            }
+        
+            new ResizeObserver(outputsize).observe(id);
+        
+        
+            id.addEventListener("input", function(e){
+                datalist.style.display = "block";
+                var text = id.value;
+                let hide = 1;
+                for (let option of datalist.options) {
+                    if(option.value.indexOf(text) > -1){
+                        option.style.display = "block";
+                        hide = 0;
+                    } else {
+                        option.style.display = "none";
+                    }
+                }
+                if (hide){
+                    datalist.style.display = "none";
+                }
+            });
+        
+        
+            id.addEventListener("click", function(e){
+            
+                let hide = 1;
+                for (let option of datalist.options) {
+                    if (window.getComputedStyle(option, null).display == "block") hide = 0;
+                }
+                  
+                if (datalist.style.display == "block" || hide == 1){
+                    datalist.style.display = "none";
+                } else {
+                    datalist.style.display = "block";
+                }
+            });
+            
+            
+            document.addEventListener("click", function(e){
+            
+              if (e.target.tagName == "OPTION"){
+                  id.value = e.target.value;
+              }
+              if (e.target.tagName !== "DATALIST" && e.target.tagName !== "INPUT"){
+                  datalist.style.display = "none";
+              }
+            
+            });
+            
+            datalist.style.display = "none";
+        
+        }
+        
+        
+        fancyDropdown('story_addons_form');
+                
 
     </script>
 

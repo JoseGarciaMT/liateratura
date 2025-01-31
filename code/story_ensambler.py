@@ -17,7 +17,7 @@ import time
 from ChatGPT import ChatGPT
 from tqdm import tqdm
 from pprint import pprint
-from datetime import datetime as dt
+import datetime
 
 
 from DatabaseConnector import _read_file, _write_file

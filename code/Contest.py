@@ -270,9 +270,9 @@ class Contest:
                 elif  len(similar_info) == 1:
                     cleaned_params[col] = output_dict.get(similar_info[0]).strip()
 
-        date_date = dt.strptime(input_params.get("date"), '%d:%m:%Y').date()
+        date_date = dt.strptime(regex.sub(r"\s*", "", input_params.get("date")), '%d:%m:%Y').date()
         try:
-            fecha_date = dt.strptime(regex.sub(r"[\-\/]", ":", cleaned_params.get("fecha_de_vencimiento")), '%d:%m:%Y').date()
+            fecha_date = dt.strptime(regex.sub(r"\s?[\-\/]s?", ":", cleaned_params.get("fecha_de_vencimiento")), '%d:%m:%Y').date()
             final_date = max(fecha_date, date_date)
         except:
             final_date = date_date

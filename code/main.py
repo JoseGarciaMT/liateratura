@@ -163,7 +163,7 @@ def index():
     if not "restriction_cond" in session or difference >= time_lapse:
         if request.method == 'GET':  
             content = {}
-            content["text1"] = "Necesito que enumeres lo que consideres que podría afectar tus posibilidades de poder participar en un concurso literario" 
+            content["text1"] = "Necesito que enumeres lo que consideres que podría mermar tus posibilidades de ser aceptado para entrar a participar en un certamen literario" 
             content["text2"] = "(nacionalidad, lugar de residencia, edad, y, en caso de que sea aplicable, centro de estudios en el que estás matriculado):"
             return render_template('index.html', content=content)
         else:
@@ -215,8 +215,8 @@ def contests_rules_displayer():
         
     else:
         session["selected_contest"] = request.form.get('select_contest_form')
+        print("\n"+session["selected_contest"]+"\n", file=sys.stderr)
         story_addons_text = regex.sub(r"^\W*|\W*$", "", request.form.get('story_addons_form'))+"."
-        print("\n"+story_addons_text+"\n", file=sys.stderr)
         if len(story_addons_text) > 2:
             story_addons_idx = [k for k, v in story_addons.items() if SequenceMatcher(None, unidecode(story_addons_text), unidecode(v)).ratio() > .88]
             
@@ -247,6 +247,8 @@ def story_displayer():
         selected_contest = session["selected_contest"]
         input_params["story_addons"] = regex.sub(r"\.+$", "", 
                                                  story_addons.get(session["story_addons"], "ostentara cierto sarcasmo."))
+        
+        print("\n"+selected_contest+"\n", file=sys.stderr)
         input_params["bases"] = contest.final_bases.get(int(selected_contest))
         
         sc_path = os.path.join(root_path, "data", "stories", f"{selected_contest}.pkl")

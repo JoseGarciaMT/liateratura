@@ -13,7 +13,7 @@
 
 	
 <body>
-    <div id="loading" class="loading"></div>
+    <div id="loading" class="loading"><h1 id="loading_title" class="loading_title">La IA, pensando muy fuerte....</h1><br></div>
     <div class="cond_requester" id="cond_requester">
         <div class="restrict_msg" id="restrict_msg" >
             {{content.text1 | safe}}
@@ -23,7 +23,6 @@
         </div>  
         <form method="post" class="joining_form_wrapper" id="joining_form_wrapper" onsubmit="trigger()">
             <textarea id="feed_message" name="user_conds" placeholder="Por ejemplo: Soy de Madrid, tengo 36 años y vivo en Valencia, donde me hallo cursando un máster en la Universidad de ídem." required></textarea>
-            <br>
             <input type="hidden" id="joining_form" name="joining_form" value="0">
             <button class="button-53" id="button4change" role="button" type="submit" value="submit">Enviar</button>
         </form> 

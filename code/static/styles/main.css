@@ -44,12 +44,14 @@ a:active {
 }
 
 .loading {
-    background: #FFFFFF95 url('../chaplin.gif') no-repeat center center;
+    background: #FFFFFF url('../chaplin.gif') no-repeat center center;
     display: none;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    z-index: 9999999;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0px;
+    left:0px;
+    z-index:1000;
 }
 
 .button-52 {
@@ -126,28 +128,14 @@ li + li {
     justify-items: center;
     position: absolute;
     display: grid;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: 40% auto;
     width: 55%;
-    height: 85%;
-    margin: 1em 2.5em;
+    height: 80%;
+    margin: 2em 2.5em;
     padding: .5em 3em 1em 3em;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;    
 }
 
-#feed_message {
-    font-size: 16px;
-    position: relative;
-    height: 70%;
-    width: 100%;
-    padding: 25px;
-}
-
-#button4change {
-    position: absolute;
-    z-index: 999:
-    bottom: 1%;
-    right: 1%;
-}
 
 .restrict_msg {
     position: relative;
@@ -167,16 +155,32 @@ li + li {
 }
 
 .joining_form_wrapper {
+    margin-top: .5em;
     position: relative;
-    grid-row: -1;
+    grid-row: 2;
     display: grid;
+    grid-template-rows: 1fr auto;
     justify-content: center;
+    height: 100%;
+    width: 100%;
 }
-/*  
-.joining_form_wrapper {
 
+#feed_message {
+    font-size: 16px;
+    position: relative;
+    grid-row: 1;
+    height: 25vh;
+    width: 50vw;
+    padding: 25px;
 }
- */
+
+
+#button4change {
+    position: relative;
+    z-index: 999:
+    grid-row: -1;
+}
+
 
 .button-53 {
   background-color: #30a7c9;
@@ -355,9 +359,7 @@ h1 {
     font-size: 3em;
 }
 
-h2 {
-    font-size: 2em;
-}
+
 
 .loading_title {
     position: relative;
@@ -393,15 +395,6 @@ h2 {
     background-color: #FFFFFF50;
     padding: 1em;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
-}
-
-.generate_story {
-    position: relative;
-    grid-row: 3;
-    background-color: #b1d6e690;
-    border-radius: 3px;
-    margin: 0em 2em;
-    padding: 1em 3em 5em 3em;
 }
 
 
@@ -464,46 +457,84 @@ blockquote {
     }
 
 
+.generate_story {
+    position: relative;
+    grid-row: 3;
+    background-color: #b1d6e690;
+    border-radius: 3px;
+    margin: 0em 2em;
+    padding: 1em 3em 5em 3em;
+    display: grid;
+    gird-template-columns: auto 1fr auto;
+    gird-template-rows: auto 1fr auto;
+    grid-gap: 1em;
+    align-items: center;
+    justify-content: center;
+}
+
+h2 {
+    font-size: 2em;
+    grid-row: 1;
+    grid-column: 1 / 4;
+}
+
+
+
+#story_addons_label {
+    font-size: 17px;
+    grid-column: 1;
+    grid-row: 2;
+}
+
 input[type=text] {
+    grid-column: 2;
+    grid-row: 2;
     background: white;
     border: 1px solid #DDD;
     border-radius: 1px;
     box-shadow: 0 0 3px #DDD inset;
     color: #595757;
     padding: 5px 10px;
-    width: 75%;
+    width: 62vw;
     height: 50px;
     outline: none;
     font-size: 17px;
     font-family: "Arimo", serif;
-    transition: 0.2s
+    transition: 0.2s;
     }
-    
     
 input[type=text]:focus{
     border: 1px solid #db9c2e; 
     box-shadow: 0px 0px 3px 0px #db9c2e;
     border-radius:4px 4px 0 0;
     }
+        
+
+#button4change2story {
+    position: relative;
+    grid-column: 3;
+    grid-row: 2;
+}
+
 
 datalist {
-    margin: .1em 1em 1em 10em;
     overflow-y: auto;
     box-sizing: border-box;
-    display: block;
-    position: absolute;
+    display: inline;
+    position: relative;
+    grid-row: 3;
+    grid-column: 1 / 4;
     background-color: #212529;
     border: 1px solid #404449;
     border-radius: 0 0 4px 4px;
-    padding: 5px;
-    max-height: 10rem;
+    padding: 7px;
+    max-height: 12rem;
     border: 1px solid #db9c2e; 
     box-shadow: 0px 0px 3px 0px #db9c2e;
-
 }
 
 option {
-    color: white;
+    color: #faf9f6;
     padding: 4px;
     margin-bottom: 1px;
     font-size: 18px;
@@ -516,9 +547,6 @@ option:hover{
     }
 
 
-label {
-    font-size: 17px;
-}
 
 .cont_story_rules {
     display: none;

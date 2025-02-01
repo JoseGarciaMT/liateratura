@@ -25,7 +25,7 @@ import time
 from ChatGPT import ChatGPT
 from tqdm import tqdm
 
-from DatabaseConnector import _read_file, _write_file
+from DatabaseConnector import _read_file, _write_file, _path_exists
     
 
 class Contest:
@@ -300,11 +300,11 @@ class Contest:
     def get_ruled_contests(self):
                 
         if not self.final_bases:
-            if os.path.exists(self.bases_path):
+            if _path_exists(self.bases_path):
                self.final_bases = _read_file(self.bases_path)
             else:
                 if not self.naked_bases:
-                    if os.path.exists(self.naked_bases_path):
+                    if _path_exists(self.naked_bases_path):
                        self.naked_bases = _read_file(self.naked_bases_path)
                     else:
                         print("\nDownloading the contests' information and extracting its rules with regex...\n")

@@ -44,7 +44,7 @@ a:active {
 }
 
 .loading {
-    background: #FFFFFF url('../chaplin.gif') no-repeat center center;
+    background: #FFFFFF98 url('../chaplin.gif') no-repeat center center;
     display: none;
     position:fixed;
     width:100%;
@@ -286,9 +286,6 @@ li + li {
   clip-path: polygon(0 0, 101% 0, 101% 101%, 0 101%);
 }
 
-.button-48:after {
-  background-color: #b1d6e6;
-}
 
 .button-48 span {
   z-index: 1;
@@ -368,7 +365,7 @@ h1 {
 .loading_title {
     position: relative;
     top: 12%;
-    background-color: white;
+    background-color: #FFFFFF98;
     border-radius: 1%;
     padding: 1em;
     }

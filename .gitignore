@@ -168,3 +168,4 @@ code/credentials.json
 code/token.json
 code/auth.json
 code/auth.json
+secrets/service_account.json

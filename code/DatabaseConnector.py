@@ -16,6 +16,9 @@ from google.cloud import storage
 
 
 
+_project = "liateratura"
+_bucket = "data_liateratura"
+
 def _read_file (path):
     """
     Carga un archivo csv, txt o pickle y devuelve el contenido correspondiente.
@@ -32,7 +35,7 @@ def _read_file (path):
     _, file_extension = os.path.splitext(path)
     
     if os.environ.get('SERVER_TYPE', '') == 'GCP': 
-        path = "gs://data_liateratura" + path
+        path = "gs://" + _bucket + path
         if file_extension == '.csv':
             if path.find("configs")>0:
                 obj = pd.read_csv(path, keep_default_na=False)
@@ -41,15 +44,15 @@ def _read_file (path):
             else:
                 obj = pd.read_csv(path)
         elif file_extension == '.pickle' or file_extension==".pkl":
-            fs = gcsfs.GCSFileSystem(project='truchiwoman', token='cloud')
+            fs = gcsfs.GCSFileSystem(project=_project, token='cloud')
             with fs.open(path, 'rb') as f:
                 obj = pickle.load(f)
         elif file_extension == '.joblib':
-                fs = gcsfs.GCSFileSystem(project='truchiwoman', token='cloud')
+                fs = gcsfs.GCSFileSystem(project=_project, token='cloud')
                 with fs.open(path, 'rb') as f:
                     obj = joblib.load(f)
         else:
-            fs = gcsfs.GCSFileSystem(project='truchiwoman', token='cloud')
+            fs = gcsfs.GCSFileSystem(project=_project, token='cloud')
             with fs.open(path, 'r') as fh:
                 obj = fh.read()
 
@@ -86,8 +89,8 @@ def _write_file (obj, path):
     _, file_extension = os.path.splitext(path)
 
     if os.environ.get('SERVER_TYPE', '') == 'GCP': 
-        path = "gs://data_liateratura" + path
-        fs = gcsfs.GCSFileSystem(project='liateratura', token='cloud')
+        path = "gs://" + _bucket + path
+        fs = gcsfs.GCSFileSystem(project=_project, token='cloud')
         
         if file_extension == '.csv':
             obj.to_csv(path, index=False)
@@ -114,7 +117,7 @@ def _write_file (obj, path):
 def _list_dir(path):
     if os.environ.get('SERVER_TYPE', '') == 'GCP': 
         storage_client = storage.Client()
-        blobs = storage_client.list_blobs('data_liateratura', prefix=path[1:])
+        blobs = storage_client.list_blobs(_bucket, prefix=path[1:])
         
         cand_files = [b.name for b in blobs]
         
@@ -132,8 +135,8 @@ def _list_dir(path):
 
 def _path_exists(path):
     if os.environ.get('SERVER_TYPE', '') == 'GCP':
-        path = "gs://data_liateratura" + path
-        fs = gcsfs.GCSFileSystem(project='liateratura', token='cloud')
+        path = "gs://" + _bucket + path
+        fs = gcsfs.GCSFileSystem(project=_project, token='cloud')
         return fs.exists(path)
     else:
         return os.path.exists(path)

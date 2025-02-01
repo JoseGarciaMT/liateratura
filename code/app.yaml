@@ -2,7 +2,7 @@ runtime: python39
 instance_class: F4_1G
 default_expiration: "10m"
 env_variables:
-  CLOUD_STORAGE_BUCKET: data_truchiwoman
+  CLOUD_STORAGE_BUCKET: data_liateratura
   SERVER_TYPE: GCP
   VERBOSE: False
 

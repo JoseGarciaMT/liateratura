@@ -12,38 +12,39 @@ from pydrive2.drive import GoogleDrive
 
 from markdown import markdown
 
-import os
+import os, sys
+import json
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+
+from google.oauth2.service_account import Credentials 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from DatabaseConnector import _write_file, _read_file
+
+
+root_path = os.path.dirname(os.path.dirname(__file__))
+token_path = os.path.join(root_path,"secrets", "service_account.json") 
 
 class GDriveManager:        
         
     def __init__(self):
         gauth = GoogleAuth()
-        gauth.LocalWebserverAuth()
+
+        settings = {
+            "client_config_backend": "service",
+            "service_config": {
+                "client_json_file_path": "service_account.json"}
+                }
+        # Create instance of GoogleAuth
+        gauth = GoogleAuth(settings=settings)
+        gauth.ServiceAuth()
+
         self.drive = GoogleDrive(gauth)
         
-        SCOPES = ['https://www.googleapis.com/auth/drive']
-        self.creds = None
-    
-        if os.path.exists('token.json'):
-            self.creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    
-        if not self.creds or not self.creds.valid:
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'credentials.json', SCOPES)
-                self.creds = flow.run_local_server(port=0)
-    
-            with open('token.json', 'w') as token:
-                token.write(self.creds.to_json())
+        auth_json = _read_file(token_path)
+        self.creds = Credentials.from_service_account_info(json.loads(auth_json))
+        
                 
     def generate_gdoc_from_text(self, title, text, filename, formatting = {"font_family":"arial","font_size":"11","line-height":"1.5"}):
 
@@ -71,9 +72,8 @@ class GDriveManager:
             service = build('drive', 'v3', credentials=self.creds)
             data = service.files().export(fileId=gdoc_id, mimeType=mimeType).execute()
             if data:
-                with open(filename, 'wb') as target_file:
-                    target_file.write(data)
+                _write_file(data, filename)
                     
         except HttpError as error:
-            print(F'An error occurred: {error}')
+            print(F'An error occurred: {error}', file=sys.stderr)
     

@@ -239,16 +239,22 @@ class Contest:
         concursos_dict = {}
         keys1 = copy.deepcopy(keys)
         for i, e in enumerate(keys):
-            if regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases):
-                start_ch = regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases).end()
+            start_re = regex.search(regex.compile("(?<![\w\s\,\.\;])"+regex.escape(e)+"(?![\w\s\,\.\;])", regex.I), chatgpt_resp_bases)
+            if start_re:
+                start_ch = start_re.end()
                 keys1.remove(e)
                 if keys1:
                     post_keys_str = '|'.join(list(map(regex.escape, keys1)))
-                    post_keys_re = regex.compile(f"[^\s\w]+({post_keys_str})($|[^\s\w])", regex.I)
-                    end_ch = regex.search(post_keys_re, chatgpt_resp_bases).start()
+                    post_keys_re = regex.compile(f"(?<![\w\s\,\.\;])({post_keys_str})(?![\w\s\,\.\;])", regex.I)
+                    end_ch_re = regex.search(post_keys_re, chatgpt_resp_bases)
+                    if end_ch_re:
+                        end_ch = end_ch_re.start()
+                        cleaned_rule_text = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|[\n\s]*$", "", chatgpt_resp_bases[start_ch: end_ch])
+                    else:
+                        cleaned_rule_text = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|\W*$", "", chatgpt_resp_bases[start_ch: -1])
                 else:
-                    end_ch = -1
-                cleaned_rule_text = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|[\n\s\}]*$", "", chatgpt_resp_bases[start_ch: end_ch])
+                    cleaned_rule_text = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|\W*$", "", chatgpt_resp_bases[start_ch: -1])
+
                 concursos_dict[e] = regex.sub(r"(?<=\W)\W+$", "", cleaned_rule_text)
                 
         input_params["bases"] = concursos_dict

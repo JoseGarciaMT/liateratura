@@ -31,8 +31,8 @@ from main import generate_chatgpt_story, chatgpt_restrict_checker, rules_keys_cl
 if __name__ == "__main__":
     
     ## PATHS
-    # root_path = os.path.dirname(os.path.dirname(__file__))
-    root_path = os.path.dirname(os.getcwd())
+    root_path = os.path.dirname(os.path.dirname(__file__))
+    # root_path = os.path.dirname(os.getcwd())
 
     data_path = os.path.join(root_path, "data", "available_contests0.csv")
     prompts_path = os.path.join(root_path, "data", "utils", "prompts.csv")

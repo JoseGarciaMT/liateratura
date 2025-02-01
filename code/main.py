@@ -20,7 +20,7 @@ import uuid
 import datetime
 from dateutil import parser
 from difflib import SequenceMatcher
-
+import sys
 
 from DatabaseConnector import _write_file, _read_file, _path_exists
 from GDriveManager import GDriveManager
@@ -114,7 +114,8 @@ def generate_chatgpt_story(input_params):
     story = regex.sub(rex_cleaner, "", story)
             
     cond_title0 = regex.search(r"(?<=^\W*(t\wtul(ad)?o|\w+\:)\W+)[^\n]+", story, regex.I)
-    cond_title1 = regex.search(r"^\W*([A-Z]\w+(\W{1,3}\w+){,13}\W*)(?=\n+[A-Z][a-záéíóú]+\s([A-Z][a-záéíóú]+){,3}[a-záéíóú]{2,})", story)
+    cond_title1 = regex.search(r"^\W*([A-Z]\w+([^\n\w\-\#\*]{1,3}\w+){,25}[^\n\w\-\#\*]*)(?=\W*\n+[A-Z][a-záéíóú]+\s([A-Z][a-záéíóú]+){,3}[a-záéíóú]{2,})", story)
+
     if cond_title0:
         story_title = regex.sub(r"(^\W+|[\s\n\*\#\-]+$)", "", cond_title0.group())
     elif cond_title1:
@@ -186,6 +187,7 @@ def contests_rules_displayer():
     story_addons = dict(zip(story_addons_df.idx, story_addons_df.story_addons))
     
     if request.method == 'GET': 
+        # print("\n"+session.get("last_visit", "whats up?")+"\n", file=sys.stderr)
         if isinstance(session["last_visit"], str):
             last_visit = parser.parse(session["last_visit"]).date()
         else:

@@ -9,30 +9,27 @@ Flask app
 
 """
 
-import regex, os, io, sys
-from random import sample
+import regex, os
 import pandas as pd
-import numpy as np 
 
 from unidecode import unidecode
 
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, request, session, redirect, url_for
 
 import uuid
-import time
 import datetime
 from dateutil import parser
 from difflib import SequenceMatcher
 
-from google.cloud import storage
 
-from DatabaseConnector import _write_file, _read_file, _list_dir, _path_exists
+from DatabaseConnector import _write_file, _read_file, _path_exists
+from GDriveManager import GDriveManager
 from Contest import Contest
 from ChatGPT import ChatGPT
 
 
 app = Flask(__name__)
-app.secret_key = b'_asfqwr54q3rfvcEQ@$'
+app.secret_key = b'_asgagasgas@$'
 
 ## PATHS
 root_path = os.path.dirname(os.path.dirname(__file__))
@@ -68,7 +65,6 @@ chatGPT = ChatGPT()
 
 contest = Contest(root_path)
 contest.get_ruled_contests()
-
 
     
 def chatgpt_restrict_checker(final_bases, restriction_cond, n_contests=10):
@@ -260,7 +256,7 @@ def story_displayer():
         content = {}
         
         sc_path = os.path.join(root_path, "data", "stories", f"{selected_contest}.pkl")
-        if not os.path.exists(sc_path):
+        if not _path_exists(sc_path):
             outp_dict = {}
             final_response = generate_chatgpt_story(input_params)
             outp_dict[session["story_addons"]] = final_response

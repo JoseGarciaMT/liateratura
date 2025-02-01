@@ -222,10 +222,8 @@ def contests_rules_displayer():
         
     else:
         session["selected_contest"] = request.form.get('select_contest_form')
-        print("\n"+session["selected_contest"]+"\n", file=sys.stderr)
 
         story_addons_text = regex.sub(r"^\W*|\W*$", "", request.form.get('story_addons_form'))+"."
-        print(story_addons_text+"\n", file=sys.stderr)
 
         if len(story_addons_text) > 2:
             story_addons_idx = [k for k, v in story_addons.items() if SequenceMatcher(None, unidecode(story_addons_text), unidecode(v)).ratio() > .88]
@@ -248,17 +246,18 @@ def contests_rules_displayer():
 @app.route("/cuento", methods=['GET', 'POST'])
 def story_displayer():
     
+    selected_contest = session["selected_contest"]
+
+    input_params = {}
+    input_params["bases"] = contest.final_bases.get(int(selected_contest))
     if request.method == 'GET': 
         story_addons_df = _read_file(story_addons_path).reset_index()
         story_addons = dict(zip(story_addons_df.idx, story_addons_df.story_addons))
-        
-        input_params, content = {}, {}
-
-        selected_contest = session["selected_contest"]
+    
         input_params["story_addons"] = regex.sub(r"\.+$", "", 
                                                  story_addons.get(session["story_addons"], "ostentara cierto sarcasmo."))
-        
-        input_params["bases"] = contest.final_bases.get(int(selected_contest))
+
+        content = {}
         
         sc_path = os.path.join(root_path, "data", "stories", f"{selected_contest}.pkl")
         if not os.path.exists(sc_path):

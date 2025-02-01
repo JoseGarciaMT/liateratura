@@ -287,7 +287,7 @@ li + li {
 }
 
 .button-48:after {
-  background-color: #b1d6e655;
+  background-color: #b1d6e6;
 }
 
 .button-48 span {
@@ -400,7 +400,7 @@ h1 {
 .contest_rules {
     grid-column: 2;
     grid-row: 2;
-    background-color: #FFFFFF50;
+    background-color: #FFFFFF65;
     padding: 1em;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
 }

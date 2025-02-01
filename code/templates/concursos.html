@@ -52,12 +52,13 @@
     <script type="text/javascript">
         
         function toggle_details(clicked_button) {
-            for (i of Array(100).keys()){
-                if ($('#secondSel_'+i).length > 0) {
-                  $('#secondSel_'+i).hide();
-                  $('#c_name_'+i).css("background-color","white")
-                }
-            } 
+            var i =  $('#select_contest_form').attr("value")
+            
+            if ($('#secondSel_'+i).length > 0) {
+              $('#secondSel_'+i).hide();
+              $('#c_name_'+i).css("background-color","white")
+            }
+
             var cid = $(clicked_button).attr("data-value");
             
             if ($('#secondSel_'+cid).length > 0){

@@ -31,7 +31,9 @@ from main import generate_chatgpt_story, chatgpt_restrict_checker, rules_keys_cl
 if __name__ == "__main__":
     
     ## PATHS
-    root_path = os.path.dirname(os.path.dirname(__file__))
+    # root_path = os.path.dirname(os.path.dirname(__file__))
+    root_path = os.path.dirname(os.getcwd())
+
     data_path = os.path.join(root_path, "data", "available_contests0.csv")
     prompts_path = os.path.join(root_path, "data", "utils", "prompts.csv")
     story_addons_path = os.path.join(root_path, "data", "utils", "story_addons.csv")
@@ -49,10 +51,13 @@ if __name__ == "__main__":
     story_addons = dict(zip(story_addons_df.idx, story_addons_df.story_addons))
 
     chatGPT = ChatGPT()
+
     contest = Contest(root_path)
     restriction_cond = "Soy una madrileña de 36 años que vive en Valencia."
 
     contest.get_ruled_contests()
+    print(contest.final_bases.get(1).keys())
+    
     
     accepted_contests = chatgpt_restrict_checker(contest.final_bases, restriction_cond, n_contests=5)
 
@@ -60,6 +65,7 @@ if __name__ == "__main__":
 
     pprint(content)
                 
+    assert 0 == 1
     print("\nQuerying ChatGPT for the story...\n")
     story_addons1 = story_addons.get(random.choice(range(1, len(story_addons)+1)))
     verbose = True    

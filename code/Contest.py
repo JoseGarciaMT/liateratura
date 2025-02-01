@@ -13,6 +13,7 @@ from Plica import Plica
 # from EmailUtils import send_email
 
 import requests
+import copy
 from bs4 import BeautifulSoup as bs
 import os, regex
 import random
@@ -31,12 +32,11 @@ class Contest:
     
     def __init__(self, root_path):
         
+        self.root_path = root_path
         self.contest_uuid = uuid.uuid4()
         self.url = "https://www.escritores.org/concursos/concursos-1/concursos-cuento-relato"
-        self.root_path = root_path
         self.naked_bases_path = os.path.join(root_path, "data", "naked_bases.pkl")
         self.bases_path = os.path.join(root_path, "data", "users", "all_rules.pkl")
-        self.accepted_contests_path = os.path.join(root_path, "data", "users", "user_rules.pkl")
         
         self.final_bases = None
         self.naked_bases = None
@@ -192,34 +192,42 @@ class Contest:
                 cond_resid = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*(municipio|provincia|[Cc]omunidad\s[Aa]ut|ciudad|empadronad)", concurso.text)
                 cond_alumn = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*(alumno|estudiante|matriculad)", concurso.text)
                 
-                input_params = {}                    
-                input_params["name"] = name
-                input_params["date"] = date
-                input_params["allows_mail"] = bool(cond_mail)
-                input_params["from_spain"] = bool(cond_spain)
-                input_params["has_age_restriction"] = bool(cond_age)
-                input_params["has_residency_restriction"] = bool(cond_resid)
-                input_params["has_student_restriction"] = bool(cond_alumn)
-                
-                # input_params["cumple_condiciones"] = True if (input_params.get("allows_mail") and input_params.get("from_spain") and not (input_params.get("has_age_restriction") or input_params.get("has_residency_restriction") or input_params.get("has_student_restriction"))) else False
-                if input_params.get("allows_mail"):
-                    url = "https://www.escritores.org"+concurso.find("a")["href"]
-                    resp0 = self._get_proxies(url)
-                    while_n = 0
-                    while not (resp0 or while_n >= 5):
-                        time.sleep(5)
-                        resp0 = self._get_proxies(url)
-                        while_n += 1
-            
-                    if resp0:
-                        mini_soup = bs(resp0.content, "html.parser")
-                        # Cleaning string
-                        input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
-                        input_params["raw"] = input_params["regex_out"].pop("raw")
-                        input_params["url"] = url
-                        input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
-                        self.naked_bases[n] = input_params
+                intflag = False
+                if self.naked_bases:
+                    names_str = "__".join([v.get("name") for k, v in self.naked_bases.items()])
+                    already_there_cond = regex.search(regex.sub(r"\s\([A-Z]\w+(\s\w+){,4}\)\s?$", "", name), names_str)
+                    if already_there_cond and len(already_there_cond.group()) >= 5:
+                        intflag = True
                         
+                if not intflag:
+                    input_params = {}                    
+                    input_params["name"] = name
+                    input_params["date"] = date
+                    input_params["allows_mail"] = bool(cond_mail)
+                    input_params["from_spain"] = bool(cond_spain)
+                    input_params["has_age_restriction"] = bool(cond_age)
+                    input_params["has_residency_restriction"] = bool(cond_resid)
+                    input_params["has_student_restriction"] = bool(cond_alumn)
+                    
+                    # input_params["cumple_condiciones"] = True if (input_params.get("allows_mail") and input_params.get("from_spain") and not (input_params.get("has_age_restriction") or input_params.get("has_residency_restriction") or input_params.get("has_student_restriction"))) else False
+                    if input_params.get("allows_mail"):
+                        url = "https://www.escritores.org"+concurso.find("a")["href"]
+                        resp0 = self._get_proxies(url)
+                        while_n = 0
+                        while not (resp0 or while_n >= 5):
+                            time.sleep(5)
+                            resp0 = self._get_proxies(url)
+                            while_n += 1
+                
+                        if resp0:
+                            mini_soup = bs(resp0.content, "html.parser")
+                            # Cleaning string
+                            input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
+                            input_params["raw"] = input_params["regex_out"].pop("raw")
+                            input_params["url"] = url
+                            input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
+                            self.naked_bases[n] = input_params
+                            
         return self
             
 
@@ -228,17 +236,21 @@ class Contest:
         chatgpt_resp_bases = self.chatGPT.query_blank_slate(self.prompts.get("extraer_bases").format(**input_params), model="gpt-4o-mini")
                 
         keys = list(input_params["regex_out"].keys())
-        end_ch, end_ch0 = 0, 0
         concursos_dict = {}
+        keys1 = copy.deepcopy(keys)
         for i, e in enumerate(keys):
-            end_ch = (regex.search(regex.compile(keys[i+1]), chatgpt_resp_bases).start() 
-                      if (i+1 < len(keys)-1 and regex.search(regex.compile(keys[i+1]), chatgpt_resp_bases)) 
-                      else (end_ch + regex.search(r"\n+", chatgpt_resp_bases[end_ch:]).end() 
-                            if regex.search(r"\n+", chatgpt_resp_bases[end_ch:]) else end_ch))
-            start_ch = regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases).end() if regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases) else end_ch0
-            concursos_dict[e] = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|[\n\s]*$", "", chatgpt_resp_bases[start_ch: end_ch])
-            end_ch0 = end_ch
-    
+            if regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases):
+                start_ch = regex.search(regex.compile(regex.escape(e)), chatgpt_resp_bases).end()
+                keys1.remove(e)
+                if keys1:
+                    post_keys_str = '|'.join(list(map(regex.escape, keys1)))
+                    post_keys_re = regex.compile(f"[^\s\w]+({post_keys_str})($|[^\s\w])", regex.I)
+                    end_ch = regex.search(post_keys_re, chatgpt_resp_bases).start()
+                else:
+                    end_ch = -1
+                cleaned_rule_text = regex.sub(r"^\W+|(\W\,[\n\s]*)?\W$|[\n\s\}]*$", "", chatgpt_resp_bases[start_ch: end_ch])
+                concursos_dict[e] = regex.sub(r"(?<=\W)\W+$", "", cleaned_rule_text)
+                
         input_params["bases"] = concursos_dict
     
         return input_params
@@ -301,7 +313,6 @@ class Contest:
                     
                     print("\nAsking ChatGPT for the rules of each contest...\n")
                     self.final_bases = {}
-                    self.suspicious_conts = []
                     for ncontest, input_params in self.naked_bases.items(): 
                         cond_long_raw = input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
                         if cond_long_raw:

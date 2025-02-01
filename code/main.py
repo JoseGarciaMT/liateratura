@@ -76,7 +76,14 @@ def chatgpt_restrict_checker(final_bases, restriction_cond, n_contests=10):
     accepted_contests = []
     for k, input_params in final_bases.items(): 
         cond_sending_add = input_params.get("direccion_de_envio") and regex.search(r"(\@|https:\/\/)", input_params.get("direccion_de_envio"))
-        back2dt = datetime.datetime.strptime(input_params.get("fecha_de_vencimiento"), "%d:%m:%Y").date() if input_params.get("fecha_de_vencimiento") and regex.search(r"(\:\d+){2}", input_params.get("fecha_de_vencimiento")) else datetime.date.today() - datetime.timedelta(days=1)
+        if input_params.get("fecha_de_vencimiento"):
+            if isinstance(input_params.get("fecha_de_vencimiento"), datetime.date):
+                back2dt = input_params.get("fecha_de_vencimiento")
+            elif isinstance(input_params.get("fecha_de_vencimiento"), str) and regex.search(r"(\:\d+){2}", input_params.get("fecha_de_vencimiento")):
+                back2dt = datetime.datetime.strptime(input_params.get("fecha_de_vencimiento"), "%d:%m:%Y").date()
+            else:
+                back2dt = datetime.date.today() - datetime.timedelta(days=1)
+
         cond_date = datetime.date.today() < back2dt
         cond_extens0 = regex.search(r"novela|compilación|antología", input_params.get("genero"), regex.I) and not regex.search(r"[\,\;]", input_params.get("genero")) if input_params.get("genero") else False 
         cond_extens1 = regex.search(r"([4567890]+|[1230]{2,})\s(p\wgina|folio|cuartilla)s|([67890]|[12345]{2,})[\.\,\s]?000\spalabras", input_params.get("extension"), regex.I) if input_params.get("extension") else False
@@ -216,7 +223,10 @@ def contests_rules_displayer():
     else:
         session["selected_contest"] = request.form.get('select_contest_form')
         print("\n"+session["selected_contest"]+"\n", file=sys.stderr)
+
         story_addons_text = regex.sub(r"^\W*|\W*$", "", request.form.get('story_addons_form'))+"."
+        print(story_addons_text+"\n", file=sys.stderr)
+
         if len(story_addons_text) > 2:
             story_addons_idx = [k for k, v in story_addons.items() if SequenceMatcher(None, unidecode(story_addons_text), unidecode(v)).ratio() > .88]
             
@@ -248,7 +258,6 @@ def story_displayer():
         input_params["story_addons"] = regex.sub(r"\.+$", "", 
                                                  story_addons.get(session["story_addons"], "ostentara cierto sarcasmo."))
         
-        print("\n"+selected_contest+"\n", file=sys.stderr)
         input_params["bases"] = contest.final_bases.get(int(selected_contest))
         
         sc_path = os.path.join(root_path, "data", "stories", f"{selected_contest}.pkl")
@@ -276,6 +285,19 @@ def story_displayer():
         content["story"] = request.form.get('downl_story_form')
         content["bases"] = {"hello": "tu madre."}
         
+        if input_params.get("bases").get("formato"):
+            ruled_format = input_params.get("bases").get("formato")
+            
+        type_letra_match = regex.search(r"(?<=([lL]etra|[Tt]ipo)\s(\w+\s){,3}([lL]etra|[Tt]ipo)\s)([A-Z]\w+\s?){1,4}", ruled_format)
+        size_letra_match = regex.search(r"(?<=letra\s(\w+[\,\;]?\s){1,10}(tama\wo)\s(\w+\s){,3})\d{2}", ruled_format, regex.I)
+        interlineado_match = regex.search(r"(?<=interlinead\w+\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}interlinead\w+)", ruled_format, regex.I)
+        interlineado_match1 = regex.search(r"\b(doble|espacio)\s(doble|espacio)\b", ruled_format, regex.I)
+
+        session["tipo_letra"] = type_letra_match.group().strip() if type_letra_match else "Arial"
+        session["size_letra"] = size_letra_match.group().strip() if size_letra_match else "11"
+        session["inter_letra"] = (interlineado_match.group().strip() if interlineado_match 
+                                  else ("2" if interlineado_match1 else "1.15"))
+
     return render_template('cuento.html', content=content)
 
   

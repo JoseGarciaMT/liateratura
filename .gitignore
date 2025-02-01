@@ -171,3 +171,4 @@ code/auth.json
 secrets/service_account.json
 /secrets
 /data/tmp
+code/service_account.json

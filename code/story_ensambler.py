@@ -26,6 +26,37 @@ from main import generate_chatgpt_story, chatgpt_restrict_checker, rules_keys_cl
 
 
 
+def format_cleaner(ruled_format, letter_type_list=[
+        "([Ss]ans\-)?[Ss]erif", "Helvetica", "Arial", "Times?", 
+        "Futura", "Garamond", "Roboto", "Calibri", 
+        "Verdana", "Lucida", "Courier", "Cambria", "(Open\-)?sans"
+        ]):
+    
+    letter_type_str = "(?<=(^|\W))(({})(\s[A-Z]\w+)*)(?=($|\W))".format("|".join(letter_type_list))
+
+    results_dict = {}
+
+    type_letra_match0 = regex.search(regex.compile(letter_type_str), ruled_format)
+    type_letra_match1 = regex.search(r"(?<=(^|\s)([lL]etra|[Tt]ipo|[fF]uente)\s)([A-Z]\w+\s?){1,4}", ruled_format)
+    type_letra_match = type_letra_match1 if type_letra_match1 else type_letra_match0
+    
+    if type_letra_match:
+        letter_type_str = regex.escape(type_letra_match.group().strip())
+        
+    letter_size_str = "(?<=tama\wo\s(\w+\s){,3})1\d(?=(\D|$))|(?<=([lL]etra|[Tt]ipo|[fF]uente)\s(\W?\w+\W+){1,5})1\d(?=\s?(puntos|pts?))"+f"|(?<={letter_type_str}\W(\w+\,?\s)*)(1\d)(?=(\D|$))"
+    size_letra_match = regex.search(regex.compile(letter_size_str), ruled_format)
+    
+    interlineado_match = regex.search(r"(?<=(espaci(ad)?o|interlineado)\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}(espaci(ad)?o|interlineado))", ruled_format, regex.I)
+    interlineado_match1 = regex.search(r"\b(doble|interlineado|espacio)\s(doble|interlineado|espacio)\b", ruled_format, regex.I)
+
+    results_dict["tipo_letra"] = regex.sub(r"(?<=Times)$", " New Roman", 
+                                           regex.sub(r"(?<=[tT]ime)(\s[nN]ew\s[rR]oman)?$", "s New Roman",type_letra_match.group().strip())) if type_letra_match else "Arial"
+    results_dict["size_letra"] = size_letra_match.group().strip() if size_letra_match else "11"
+    inter_letra0 = (interlineado_match.group().strip() if interlineado_match else ("2" if interlineado_match1 else "1.15"))
+
+    results_dict["inter_letra"] = regex.sub(r"\,", ".", inter_letra0)
+    return results_dict
+
 
 
 if __name__ == "__main__":
@@ -59,57 +90,34 @@ if __name__ == "__main__":
     print(contest.final_bases.get(1).keys())
     
     
-    accepted_contests = chatgpt_restrict_checker(contest.final_bases, restriction_cond, n_contests=15)
+    # accepted_contests = chatgpt_restrict_checker(contest.final_bases, restriction_cond, n_contests=5)
 
-    content = {k: {"bases": v} for k, v in contest.final_bases.items() if k in accepted_contests}
+    # content = {k: {"bases": v} for k, v in contest.final_bases.items() if k in accepted_contests}
 
-    pprint(content)
-    
-    letter_type_list = ["(sans\-)?serif", "helvetica", "arial", "times", 
-                        "futura", "garamond", "roboto", "calibri", 
-                        "verdana", "lucida", "courier", "cambria", 
-                        "(open\-)?sans"]
-    
-    letter_type_str = "(?<=(^|\W)([A-Z]\w+\s)*)(({})(\s[A-Z]\w+)*)(?=($|\W))".format("|".join(letter_type_list))
-    letter_size_str = "(?<=tama\wo\s(\w+\s){,3})1\d(?=(\D|$))"+"|(?<=" + letter_type_str + "(\w+\s){,3})1\d(?=(\D|$))"
-    session = {}
-    for key, input_params in content.items():
-        session[key] = {}
-        ruled_format = input_params.get("bases").get("formato")
-            
-        type_letra_match0 = regex.search(regex.compile(letter_type_str, regex.I), ruled_format)
-        if not type_letra_match0:
-            print(key, "Didn't match: ", ruled_format)
-        else:
-            print(key, "Maatched: ", type_letra_match0.group())
+    # pprint(content)
+        
+    format_dict = {}
+    for key, input_params in contest.final_bases.items():
+        ruled_format = input_params.get("formato")
+        format_dict[key] = format_cleaner(ruled_format)
+        format_dict[key]["whole_format"] = ruled_format
+    pprint(format_dict)
 
-        type_letra_match = regex.search(r"(?<=([lL]etra|[Tt]ipo(graf\w+)?)\s(\w+\s){,3}([lL]etra|[Tt]ipo(graf\w+)?)\s)([A-Z]\w+\s?){1,4}", ruled_format)
-        size_letra_match = regex.search(regex.compile(letter_size_str, regex.I), ruled_format)
-        interlineado_match = regex.search(r"(?<=interlinead\w+\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}interlinead\w+)", ruled_format, regex.I)
-        interlineado_match1 = regex.search(r"\b(doble|espacio)\s(doble|espacio)\b", ruled_format, regex.I)
+    # assert 0 == 1
+    # print("\nQuerying ChatGPT for the story...\n")
+    # story_addons1 = story_addons.get(random.choice(range(1, len(story_addons)+1)))
+    # verbose = True    
 
-        session[key]["tipo_letra"] = type_letra_match.group().strip() if type_letra_match else "Arial"
-        session[key]["size_letra"] = size_letra_match.group().strip() if size_letra_match else "11"
-        session[key]["inter_letra"] = (interlineado_match.group().strip() if interlineado_match 
-                                       else ("2" if interlineado_match1 else "1.15"))
-
-
-
-    assert 0 == 1
-    print("\nQuerying ChatGPT for the story...\n")
-    story_addons1 = story_addons.get(random.choice(range(1, len(story_addons)+1)))
-    verbose = True    
-
-    selected_contest = random.choice(list(content.keys()))
-    input_params = {}
-    input_params["bases"] = content.get(selected_contest)
-    input_params["story_addons"] = story_addons1
+    # selected_contest = random.choice(list(content.keys()))
+    # input_params = {}
+    # input_params["bases"] = content.get(selected_contest)
+    # input_params["story_addons"] = story_addons1
               
-    final_response = generate_chatgpt_story(input_params, )
+    # final_response = generate_chatgpt_story(input_params, )
     
-    print("\n", final_response.get("story_addons"), "\n\n")
-    print("\n", final_response.get("final_story_title"), "\n")
-    print("\n", final_response.get("final_story"), "\n\n")
+    # print("\n", final_response.get("story_addons"), "\n\n")
+    # print("\n", final_response.get("final_story_title"), "\n")
+    # print("\n", final_response.get("final_story"), "\n\n")
     
 
     # # if input_params.get("bases")

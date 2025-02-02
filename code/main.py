@@ -145,8 +145,39 @@ def rules_keys_cleaner(k):
     else:
         return k
     
+
+def format_cleaner(ruled_format, letter_type_list=[
+        "([Ss]ans\-)?[Ss]erif", "Helvetica", "Arial", "Times?", 
+        "Futura", "Garamond", "Roboto", "Calibri", 
+        "Verdana", "Lucida", "Courier", "Cambria", "(Open\-)?sans"
+        ]):
     
+    letter_type_str = "(?<=(^|\W))(({})(\s[A-Z]\w+)*)(?=($|\W))".format("|".join(letter_type_list))
+
+    results_dict = {}
+
+    type_letra_match0 = regex.search(regex.compile(letter_type_str), ruled_format)
+    type_letra_match1 = regex.search(r"(?<=(^|\s)([lL]etra|[Tt]ipo|[fF]uente)\s)([A-Z]\w+\s?){1,4}", ruled_format)
+    type_letra_match = type_letra_match1 if type_letra_match1 else type_letra_match0
     
+    if type_letra_match:
+        letter_type_str = regex.escape(type_letra_match.group().strip())
+        
+    letter_size_str = "(?<=tama\wo\s(\w+\s){,3})1\d(?=(\D|$))|(?<=([lL]etra|[Tt]ipo|[fF]uente)\s(\W?\w+\W+){1,5})1\d(?=\s?(puntos|pts?))"+f"|(?<={letter_type_str}\W(\w+\,?\s)*)(1\d)(?=(\D|$))"
+    size_letra_match = regex.search(regex.compile(letter_size_str), ruled_format)
+    
+    interlineado_match = regex.search(r"(?<=(espaci(ad)?o|interlineado)\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}(espaci(ad)?o|interlineado))", ruled_format, regex.I)
+    interlineado_match1 = regex.search(r"\b(doble|interlineado|espacio)\s(doble|interlineado|espacio)\b", ruled_format, regex.I)
+
+    results_dict["font_family"] = regex.sub(r"(?<=Times)$", " New Roman", 
+                                           regex.sub(r"(?<=[tT]ime)(\s[nN]ew\s[rR]oman)?$", "s New Roman",type_letra_match.group().strip())) if type_letra_match else "Arial"
+    results_dict["font_size"] = size_letra_match.group().strip() if size_letra_match else "11"
+    inter_letra0 = (interlineado_match.group().strip() if interlineado_match else ("2" if interlineado_match1 else "1.15"))
+
+    results_dict["line-height"] = regex.sub(r"\,", ".", inter_letra0)
+    return results_dict
+
+
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -283,30 +314,17 @@ def story_displayer():
         story = request.form.get('downl_story_form')
         
         ruled_format = input_params.get("bases").get("formato")
-            
-        type_letra_match = regex.search(r"(?<=([lL]etra|[Tt]ipo)\s(\w+\s){,3}([lL]etra|[Tt]ipo)\s)([A-Z]\w+\s?){1,4}", ruled_format)
-        size_letra_match = regex.search(r"(?<=letra\s(\w+[\,\;]?\s){1,10}(tama\wo)\s(\w+\s){,3})\d{2}", ruled_format, regex.I)
-        interlineado_match = regex.search(r"(?<=interlinead\w+\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}interlinead\w+)", ruled_format, regex.I)
-        interlineado_match1 = regex.search(r"\b(doble|espacio)\s(doble|espacio)\b", ruled_format, regex.I)
-
-        tipo_letra = type_letra_match.group().strip() if type_letra_match else "Arial"
-        size_letra = size_letra_match.group().strip() if size_letra_match else "11"
-        inter_letra = (interlineado_match.group().strip() if interlineado_match 
-                                  else ("2" if interlineado_match1 else "1.15"))
         
-        formatting = {"font_family":tipo_letra,
-                      "font_size":size_letra,
-                      "line-height":inter_letra}
+        format_dict = format_cleaner(ruled_format)
         
         title = title.strip()
         
         gdriver = GDriveManager()
         mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         
-        #filename = "_".join(title.split(" ")) + ".docx"
         filename = title + ".docx"
         
-        file_id = gdriver.generate_gdoc_from_text(title, story, title, formatting)
+        file_id = gdriver.generate_gdoc_from_text(title, story, title, format_dict)
         
         filestream = gdriver.download_file_from_gdoc(gdoc_id = file_id, 
                                                      filename = os.path.join(downloads_path,filename),

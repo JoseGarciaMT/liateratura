@@ -56,7 +56,7 @@ class GDriveManager:
     
         gdoc = self.drive.CreateFile(
             {
-                "title": filename+".doc",
+                "title": filename+".docx",
                 "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             }
         )
@@ -76,4 +76,6 @@ class GDriveManager:
                     
         except HttpError as error:
             print(F'An error occurred: {error}', file=sys.stderr)
+            
+        return data
     

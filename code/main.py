@@ -282,8 +282,7 @@ def story_displayer():
         content["story"] = request.form.get('downl_story_form')
         content["bases"] = {"hello": "tu madre."}
         
-        if input_params.get("bases").get("formato"):
-            ruled_format = input_params.get("bases").get("formato")
+        ruled_format = input_params.get("bases").get("formato")
             
         type_letra_match = regex.search(r"(?<=([lL]etra|[Tt]ipo)\s(\w+\s){,3}([lL]etra|[Tt]ipo)\s)([A-Z]\w+\s?){1,4}", ruled_format)
         size_letra_match = regex.search(r"(?<=letra\s(\w+[\,\;]?\s){1,10}(tama\wo)\s(\w+\s){,3})\d{2}", ruled_format, regex.I)

@@ -59,12 +59,42 @@ if __name__ == "__main__":
     print(contest.final_bases.get(1).keys())
     
     
-    accepted_contests = chatgpt_restrict_checker(contest.final_bases, restriction_cond, n_contests=5)
+    accepted_contests = chatgpt_restrict_checker(contest.final_bases, restriction_cond, n_contests=15)
 
-    content = {k: v for k, v in contest.final_bases.items() if k in accepted_contests}
+    content = {k: {"bases": v} for k, v in contest.final_bases.items() if k in accepted_contests}
 
     pprint(content)
-                
+    
+    letter_type_list = ["(sans\-)?serif", "helvetica", "arial", "times", 
+                        "futura", "garamond", "roboto", "calibri", 
+                        "verdana", "lucida", "courier", "cambria", 
+                        "(open\-)?sans"]
+    
+    letter_type_str = "(?<=(^|\W)([A-Z]\w+\s)*)(({})(\s[A-Z]\w+)*)(?=($|\W))".format("|".join(letter_type_list))
+    letter_size_str = "(?<=tama\wo\s(\w+\s){,3})1\d(?=(\D|$))"+"|(?<=" + letter_type_str + "(\w+\s){,3})1\d(?=(\D|$))"
+    session = {}
+    for key, input_params in content.items():
+        session[key] = {}
+        ruled_format = input_params.get("bases").get("formato")
+            
+        type_letra_match0 = regex.search(regex.compile(letter_type_str, regex.I), ruled_format)
+        if not type_letra_match0:
+            print(key, "Didn't match: ", ruled_format)
+        else:
+            print(key, "Maatched: ", type_letra_match0.group())
+
+        type_letra_match = regex.search(r"(?<=([lL]etra|[Tt]ipo(graf\w+)?)\s(\w+\s){,3}([lL]etra|[Tt]ipo(graf\w+)?)\s)([A-Z]\w+\s?){1,4}", ruled_format)
+        size_letra_match = regex.search(regex.compile(letter_size_str, regex.I), ruled_format)
+        interlineado_match = regex.search(r"(?<=interlinead\w+\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}interlinead\w+)", ruled_format, regex.I)
+        interlineado_match1 = regex.search(r"\b(doble|espacio)\s(doble|espacio)\b", ruled_format, regex.I)
+
+        session[key]["tipo_letra"] = type_letra_match.group().strip() if type_letra_match else "Arial"
+        session[key]["size_letra"] = size_letra_match.group().strip() if size_letra_match else "11"
+        session[key]["inter_letra"] = (interlineado_match.group().strip() if interlineado_match 
+                                       else ("2" if interlineado_match1 else "1.15"))
+
+
+
     assert 0 == 1
     print("\nQuerying ChatGPT for the story...\n")
     story_addons1 = story_addons.get(random.choice(range(1, len(story_addons)+1)))

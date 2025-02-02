@@ -14,13 +14,12 @@ import pandas as pd
 
 from unidecode import unidecode
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, send_from_directory
 
 import uuid
 import datetime
 from dateutil import parser
 from difflib import SequenceMatcher
-import sys
 
 from DatabaseConnector import _write_file, _read_file, _path_exists
 from GDriveManager import GDriveManager
@@ -39,6 +38,7 @@ story_addons_path = os.path.join(root_path, "data", "utils", "story_addons.csv")
 naked_bases_path = os.path.join(root_path, "data", "naked_bases.pkl")
 bases_path = os.path.join(root_path, "data", "users", "all_rules.pkl")
 accepted_contests_path = os.path.join(root_path, "data", "users", "user_rules.pkl")
+downloads_path = os.path.join(root_path, "data", "tmp")
 
 
 ## VARS
@@ -276,11 +276,11 @@ def story_displayer():
         content["story"] = regex.sub(r"\n", "<br>", final_response.get("final_story"))
         content["bases"] = {regex.sub(r"[Cc]lean\s[Nn]ame", "Nombre", rules_keys_cleaner(k)): v for k, v in input_params["bases"].items()}
 
+        return render_template('cuento.html', content=content)
+    
     else:
-        content = {}
-        content["title"] = request.form.get('downl_title_form')
-        content["story"] = request.form.get('downl_story_form')
-        content["bases"] = {"hello": "tu madre."}
+        title = request.form.get('downl_title_form')
+        story = request.form.get('downl_story_form')
         
         if input_params.get("bases").get("formato"):
             ruled_format = input_params.get("bases").get("formato")
@@ -290,16 +290,35 @@ def story_displayer():
         interlineado_match = regex.search(r"(?<=interlinead\w+\s(\w+\s){,3})(\d([\,\.]\d{1,2})?)|(\d([\,\.]\d{1,2})?)(?=\s(\w+\s){,2}interlinead\w+)", ruled_format, regex.I)
         interlineado_match1 = regex.search(r"\b(doble|espacio)\s(doble|espacio)\b", ruled_format, regex.I)
 
-        session["tipo_letra"] = type_letra_match.group().strip() if type_letra_match else "Arial"
-        session["size_letra"] = size_letra_match.group().strip() if size_letra_match else "11"
-        session["inter_letra"] = (interlineado_match.group().strip() if interlineado_match 
+        tipo_letra = type_letra_match.group().strip() if type_letra_match else "Arial"
+        size_letra = size_letra_match.group().strip() if size_letra_match else "11"
+        inter_letra = (interlineado_match.group().strip() if interlineado_match 
                                   else ("2" if interlineado_match1 else "1.15"))
+        
+        formatting = {"font_family":tipo_letra,
+                      "font_size":size_letra,
+                      "line-height":inter_letra}
+        
+        title = title.strip()
+        
+        gdriver = GDriveManager()
+        mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        
+        #filename = "_".join(title.split(" ")) + ".docx"
+        filename = title + ".docx"
+        
+        file_id = gdriver.generate_gdoc_from_text(title, story, title, formatting)
+        
+        filestream = gdriver.download_file_from_gdoc(gdoc_id = file_id, 
+                                                     filename = os.path.join(downloads_path,filename),
+                                                     mimeType = mime)
 
-    return render_template('cuento.html', content=content)
+        with open(os.path.join("/tmp",filename),"wb") as f:
+            f.write(filestream)
+            
+        return send_from_directory("/tmp", filename, as_attachment=True)
 
-  
-    
-  
+
 
 if __name__ == '__main__':
     app.run(debug = True, threaded = False)#, host="0.0.0.0")

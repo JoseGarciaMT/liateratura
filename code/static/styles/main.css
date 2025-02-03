@@ -561,7 +561,7 @@ option:hover{
 
 
 
-.cont_story_rules {
+#cont_story_rules {
     display: none;
     background-color: white;
     position: absolute;
@@ -572,8 +572,11 @@ option:hover{
     box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
 }
 
+#cont_story_rules.show {
+    display: block;
+}
 
-.truchicard {
+#truchicard {
     display: none;
     position: absolute;
     bottom: 0%;
@@ -581,6 +584,10 @@ option:hover{
     perspective: 1000px;
     }
     
+#truchicard.show {
+    display: block;
+}
+
 .flip-box {
   background-color: transparent;
   width: 350px;
@@ -649,28 +656,24 @@ and (-webkit-min-device-pixel-ratio: 2) {
 h1 {
 font-size: 2.7em; 
 }
-
 h2 {
 font-size: 2em; 
 }
 .restrict_msg {
     font-size: 3vw; 
 }
-
 .restrict_msg_exp {
     font-size: 2vw; 
 }
 .cond_requester {
     padding: .7vw 3.5vw 1.5vw 3.5vw;
 }
-
 #feed_message {
     font-size: .6em;
     height: 28vh;
     width: 45vw;
     padding: 22px;
 }
-
 .button-51, .button-48, .button-52, .button-53 {
      font-size: 19px;
 }
@@ -680,30 +683,24 @@ font-size: 2em;
 and (min-device-width: 240px) 
 and (max-device-width: 700px)
 and (-webkit-min-device-pixel-ratio: 2) {
-
 h1 {
     font-size: 2.5em; 
 }
-
 h2 {
     font-size: 1.8em; 
 }
-
 .next_options {
     margin: 0.2vw 21vw 0.6vw 21vw;
 }
-
 .restrict_msg {
     font-size: 4vw; 
 }
-
 .restrict_msg_exp {
     font-size: 2.7vw; 
 }
 .cond_requester {
     padding: .5vw 3.1vw 1vw 3.1vw;
 }
-
 #feed_message {
     font-size: .5em;
     height: 30vh;

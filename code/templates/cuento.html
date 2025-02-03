@@ -31,13 +31,13 @@
                 </div>
             </div>
             <div class="next_options" id="next_options">
-                <button class="button-52" id="rules_button" role="button"  onclick="showElement('cont_story_rules')">Bases</button>
+                <button class="button-52" id="rules_button" role="button">Bases</button>
                 <form method="post" class="story_form" id="story_form" onsubmit="getStory()">
                     <input type="hidden" id="downl_title_form" name="downl_title_form" value="0">
                     <input type="hidden" id="downl_story_form" name="downl_story_form" value="0">
                     <button class="button-52" id="download_button" role="button" type="submit" value="submit">Descarga el texto</button>
                 </form>
-                <button class="button-52" id="truchi_btn" role="button" onclick="showElement('truchicard')">Otros proyectos</button>
+                <button class="button-52" id="truchi_btn" role="button">Otros proyectos</button>
             </div>
         </div>
         <div class="cont_story_rules" id="cont_story_rules">
@@ -72,17 +72,20 @@
             window.location.href = "concursos";
         };
         
-
-        function showElement(idname) {
-            var x = document.getElementById(idname);
-            if (x.style.display === "none") {
-                x.style.display = "inline";
-              } else {
-                x.style.display = "none";
-              }
+        window.onload = () => {
+            document.getElementById("rules_button").onclick = function() {showElement1()};
+              
+            function showElement1() {
+              document.getElementById("cont_story_rules").classList.toggle("show");
             }
 
-
+            document.getElementById("truchi_btn").onclick = function() {showElement2()};
+          
+            function showElement2() {
+              document.getElementById("truchicard").classList.toggle("show");
+            }
+        }
+            
         function getStory() {
            var story = document.getElementById("raw_story").innerHTML;
            var title = document.getElementById("story_title_block").innerHTML;
@@ -96,6 +99,7 @@
           Esta parte ya no se usa porque el download se hace en main.py
           para poder preparar el archivo .docx
 
+    
 		function downloadCurrentDocument() {
         		var storyCorpus = $('#raw_story')[0].innerHTML.replaceAll("\<br\>", "\n").trim();
         		var storyTitle = $('#story_title_block')[0].innerHTML.trim();

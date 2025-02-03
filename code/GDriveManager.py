@@ -66,8 +66,17 @@ class GDriveManager:
         return gdoc.get("id")
     
     
-    def download_file_from_gdoc(self, gdoc_id, filename, mimeType="application/pdf"):
+    def get_fstream_from_gdoc(self, gdoc_id, mimeType="application/pdf"):
+        try:
+            service = build('drive', 'v3', credentials=self.creds)
+            data = service.files().export(fileId=gdoc_id, mimeType=mimeType).execute()
+                    
+        except HttpError as error:
+            print(F'An error occurred: {error}', file=sys.stderr)
+            
+        return data
     
+    def download_file_from_gdoc(self, gdoc_id, filename, mimeType="application/pdf"):
         try:
             service = build('drive', 'v3', credentials=self.creds)
             data = service.files().export(fileId=gdoc_id, mimeType=mimeType).execute()
@@ -77,5 +86,5 @@ class GDriveManager:
         except HttpError as error:
             print(F'An error occurred: {error}', file=sys.stderr)
             
-        return data
+        
     

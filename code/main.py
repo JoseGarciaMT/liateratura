@@ -326,9 +326,12 @@ def story_displayer():
         
         file_id = gdriver.generate_gdoc_from_text(title, story, title, format_dict)
         
-        filestream = gdriver.download_file_from_gdoc(gdoc_id = file_id, 
-                                                     filename = os.path.join(downloads_path,filename),
+        filestream = gdriver.get_fstream_from_gdoc(gdoc_id = file_id, 
                                                      mimeType = mime)
+        
+        tmp_files = [ f for f in os.listdir("/tmp") if f.endswith(".docx") ]
+        for fname in tmp_files:
+            os.remove(os.path.join("/tmp",fname))
 
         with open(os.path.join("/tmp",filename),"wb") as f:
             f.write(filestream)

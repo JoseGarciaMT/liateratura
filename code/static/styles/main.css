@@ -97,8 +97,8 @@ a:active {
 
 .join_button {
   position: absolute;
-  right: 3%;
-  bottom: 3%;
+  right: 3vw;
+  bottom: 3vw;
 
 }
 /*
@@ -128,6 +128,7 @@ li + li {
     justify-items: center;
     position: absolute;
     display: grid;
+    gird-gap: 2px;
     grid-template-rows: 40% auto;
     width: 55%;
     height: 80%;
@@ -149,7 +150,7 @@ li + li {
     grid-row: 1;
     font-family: "Patrick Hand", serif;
     font-weight: 400;
-    font-size: 1.2em;
+    font-size: 3.5vh;
     text-align: center;
 }
 
@@ -157,7 +158,7 @@ li + li {
     position: relative;
     color: 	#606060;
     font-weight: 200;
-    font-size: .8em;
+    font-size: 2.8vh;
     padding: 0.5em 1em 0em 1em;
 }
 
@@ -173,7 +174,7 @@ li + li {
 }
 
 #feed_message {
-    font-size: 16px;
+    font-size: .7em;
     position: relative;
     grid-row: 1;
     height: 25vh;
@@ -360,7 +361,7 @@ h1, h2 {
 }
 
 h1 {
-    font-size: 3em;
+    font-size: 3.5vw;
     grid-row: 1;
     grid-column: 1/3;
     align-items: center;
@@ -465,7 +466,7 @@ blockquote {
     grid-template-columns: auto auto auto;
     z-index: 1;
     grid-gap: 3%;
-    margin: 0vw 27vw;
+    margin: 0.2vw 27vw 0.6vw 27vw;
     }
 
 
@@ -485,7 +486,7 @@ blockquote {
 }
 
 h2 {
-    font-size: 2em;
+    font-size: 2.3vw;
     grid-row: 1;
     grid-column: 1 / 4;
 }
@@ -638,4 +639,78 @@ option:hover{
 
 .salida_ex:hover {
     transform: translateX(-15px);
+}
+
+
+@media only screen 
+and (min-device-width: 240px) 
+and (max-device-width: 1300px)
+and (-webkit-min-device-pixel-ratio: 2) {
+h1 {
+font-size: 2.7em; 
+}
+
+h2 {
+font-size: 2em; 
+}
+.restrict_msg {
+    font-size: 3vw; 
+}
+
+.restrict_msg_exp {
+    font-size: 2vw; 
+}
+.cond_requester {
+    padding: .7vw 3.5vw 1.5vw 3.5vw;
+}
+
+#feed_message {
+    font-size: .6em;
+    height: 28vh;
+    width: 45vw;
+    padding: 22px;
+}
+
+.button-51, .button-48, .button-52, .button-53 {
+     font-size: 19px;
+}
+}
+
+@media only screen 
+and (min-device-width: 240px) 
+and (max-device-width: 700px)
+and (-webkit-min-device-pixel-ratio: 2) {
+
+h1 {
+    font-size: 2.5em; 
+}
+
+h2 {
+    font-size: 1.8em; 
+}
+
+.next_options {
+    margin: 0.2vw 21vw 0.6vw 21vw;
+}
+
+.restrict_msg {
+    font-size: 4vw; 
+}
+
+.restrict_msg_exp {
+    font-size: 2.7vw; 
+}
+.cond_requester {
+    padding: .5vw 3.1vw 1vw 3.1vw;
+}
+
+#feed_message {
+    font-size: .5em;
+    height: 30vh;
+    width: 50vw;
+    padding: 18px;
+}
+.button-51, .button-48, .button-52, .button-53 {
+     font-size: 17px;
+}
 }

@@ -338,7 +338,12 @@ def story_displayer():
             
         return send_from_directory("/tmp", filename, as_attachment=True)
 
-
+@app.route("/update_contests",  methods=['POST'])
+def new_contests_loader():
+    contest.downloading_contest_info()
+    _write_file(contest.naked_bases, contest.naked_bases_path)
+        
+    
 
 if __name__ == '__main__':
     app.run(debug = True, threaded = False)#, host="0.0.0.0")

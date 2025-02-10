@@ -342,6 +342,7 @@ def story_displayer():
 def new_contests_loader():
     contest.downloading_contest_info()
     _write_file(contest.naked_bases, contest.naked_bases_path)
+    return "Success", 201
         
     
 

@@ -338,10 +338,21 @@ def story_displayer():
             
         return send_from_directory("/tmp", filename, as_attachment=True)
 
+
 @app.route("/update_contests",  methods=['POST'])
 def new_contests_loader():
     contest.downloading_contest_info()
     _write_file(contest.naked_bases, contest.naked_bases_path)
+    
+    contest.final_bases = {}
+    for ncontest, input_params in contest.naked_bases.items(): 
+        cond_long_raw = input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
+        if cond_long_raw:
+            input_params1 = contest.generate_chatgpt_story_rules(input_params)
+            cleaned_params = contest.rules_dict_cleaner(input_params1)
+            contest.final_bases[ncontest] = cleaned_params
+        
+    _write_file(contest.final_bases, contest.bases_path)
     return "Success", 201
         
     

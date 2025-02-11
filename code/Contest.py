@@ -36,7 +36,7 @@ class Contest:
         self.contest_uuid = uuid.uuid4()
         self.url = "https://www.escritores.org/concursos/concursos-1/concursos-cuento-relato"
         self.naked_bases_path = os.path.join(root_path, "data", "naked_bases.pkl")
-        self.bases_path = os.path.join(root_path, "data", "users", "all_rules.pkl")
+        self.bases_path = os.path.join(root_path, "data", "all_rules.pkl")
         
         self.final_bases = None
         self.naked_bases = None

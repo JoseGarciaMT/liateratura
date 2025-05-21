@@ -92,10 +92,10 @@ class Contest:
         price = regex.findall(r"(?<=Premio\:\s*).+(?=Abierto\sa\:)", raw)[0].strip()
         restrictions = regex.findall(r"(?<=Abierto\sa\:\W*)\w[\W\w]+(?=Entidad\sconvocante\:)", raw)[0].strip()
         entity = regex.findall(r"(?<=Entidad\sconvocante\:\W*)\w[\W\w]+(?=País\sde\sla\sentidad\sconvocante\:)", raw)[0].strip()
-        country = regex.findall(r"(?<=País\sde\sla\sentidad\sconvocante\:\W*)([A-Z]\w[\W\w]+)(?=Participación\spor\smedios\selectrónicos\:)|(?=Fecha\sde\scierre\:)", raw)[0].strip()
-        via_mail0 = regex.findall(r"(?<=Participación\spor\smedios\selectrónicos\:\W*)([sS]í|[nN]o)(?=Fecha\sde\scierre\:)", raw)
+        country = regex.findall(r"(?<=País\sde\sla\sentidad\sconvocante\:\W*)([A-Z]\w[\W\w]+)(?=Participación\spor\smedios\selectrónicos\:)|(?=Fechas?\sde\scierre\:)", raw)[0].strip()
+        via_mail0 = regex.findall(r"(?<=Participación\spor\smedios\selectrónicos\:\W*)([sS]í|[nN]o)(?=Fechas?\sde\scierre\:)", raw)
         via_mail = via_mail0[0].strip() if via_mail0 else "N/A"
-        expiration_date = regex.findall(r"(?<=Fecha\sde\scierre\:\W*)((\d+\W){2}\d+)", raw)[0][0].strip()
+        expiration_date = regex.findall(r"(?<=Fechas?\sde\scierre\:\W*)((\d+\W){2}\d+)", raw)[0][0].strip()
     
         raw1 = ". ".join([div.text for div in mini_soup.find_all("p") if div.text and not div.text == '\xa0'])
         content_start = regex.search(r"\.\s+BASES[IVX\:]*\.", raw1).end()

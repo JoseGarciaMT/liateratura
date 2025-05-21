@@ -246,7 +246,7 @@ class Contest:
         
         chatgpt_resp_bases = self.chatGPT.query_blank_slate(self.prompts.get("extraer_bases").format(**input_params), model="gpt-4o-mini")
                 
-        keys = list(input_params["regex_out"].keys())
+        keys = input_params["regex_out_keys"]
         concursos_dict = {}
         keys1 = copy.deepcopy(keys)
         for i, e in enumerate(keys):

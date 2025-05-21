@@ -84,7 +84,7 @@ class Contest:
         content_end = regex.search(r"BASES[IVX\W\:]*", raw0).start()
         
         raw = raw0[:content_end]
-        name = (regex.search(r"^(([XIVL]*\.?|\d+\S*|(PRIMER|SEGUNDO|TERCER|CUARTO|QUINTO))\s)?(EDICIÓN|CONCURSO|CERTAMEN|PREMIO)\s[^\-]+(?=\W+Escritores.org\W+)", raw.strip()).group().strip() 
+        name = (regex.search(r"^(([XIVL]*\.?|\d+[ºª]?\S*|(PRIMER|SEGUNDO|TERCER|CUARTO|QUINTO))\s)?(EDICIÓN|CONCURSO|CERTAMEN|PREMIO)\s[^\-]+(?=\W+Escritores.org\W+)", raw.strip()).group().strip() 
                 if regex.search(r"^(([XIVL]*\.?|\d+\S*|(PRIMER|SEGUNDO|TERCER|CUARTO|QUINTO))\s)?(EDICIÓN|CONCURSO|CERTAMEN|PREMIO)\s[^\-]+(?=\W+Escritores.org\W+)", raw.strip()) 
                 else (regex.search(r"^[^\-]+(?=\-\s*Escritores.org\W+)", raw.strip()).group().strip() 
                       if regex.search(r"^[^\-]+(?=\-\s*Escritores.org\W+)", raw.strip()) else ""))
@@ -224,13 +224,19 @@ class Contest:
                             # Cleaning string
                             try:
                                 input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
+                                input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
                                 input_params["raw"] = input_params["regex_out"].pop("raw")
                             except:
                                 input_params["regex_out"] = "No se han podido extraer las bases del concurso."
+                                input_params["regex_out_keys"] = ["fecha de vencimiento", "posibilidad de envíar por email (sí o no)", 
+                                                                  "dirección de envío", "país convocante", 
+                                                                  "fecha de vencimiento", "restricciones", 
+                                                                  "premio", "género", "tema", "extensión", 
+                                                                  "formato", "plica", "otros idiomas"]
+
                                 input_params["raw"] = mini_soup.getText()
                             
                             input_params["url"] = url
-                            input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
                             self.naked_bases[n] = input_params
                             
         return self

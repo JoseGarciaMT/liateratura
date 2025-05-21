@@ -77,7 +77,7 @@ class Contest:
       
 
     def relevant_info_retriever(self, mini_soup):
-        
+
         raw0 = mini_soup.getText()
         
         concursos_dict_n = {}
@@ -88,7 +88,7 @@ class Contest:
                 if regex.search(r"^(([XIVL]*\.?|\d+\S*|(PRIMER|SEGUNDO|TERCER|CUARTO|QUINTO))\s)?(EDICIÓN|CONCURSO|CERTAMEN|PREMIO)\s[^\-]+(?=\W+Escritores.org\W+)", raw.strip()) 
                 else (regex.search(r"^[^\-]+(?=\-\s*Escritores.org\W+)", raw.strip()).group().strip() 
                       if regex.search(r"^[^\-]+(?=\-\s*Escritores.org\W+)", raw.strip()) else ""))
-        gender = regex.findall(r"(?<=Género\:\s*)[\w\s\,\;\.+]+(?=Premio\:)", raw)[0].strip()
+        gender = regex.findall(r"(?<=Género\:\s*).+(?=Premio\:)", raw)[0].strip()
         price = regex.findall(r"(?<=Premio\:\s*).+(?=Abierto\sa\:)", raw)[0].strip()
         restrictions = regex.findall(r"(?<=Abierto\sa\:\W*)\w[\W\w]+(?=Entidad\sconvocante\:)", raw)[0].strip()
         entity = regex.findall(r"(?<=Entidad\sconvocante\:\W*)\w[\W\w]+(?=País\sde\sla\sentidad\sconvocante\:)", raw)[0].strip()
@@ -222,8 +222,13 @@ class Contest:
                         if resp0:
                             mini_soup = bs(resp0.content, "html.parser")
                             # Cleaning string
-                            input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
-                            input_params["raw"] = input_params["regex_out"].pop("raw")
+                            try:
+                                input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
+                                input_params["raw"] = input_params["regex_out"].pop("raw")
+                            except:
+                                input_params["regex_out"] = "No se han podido extraer las bases del concurso."
+                                input_params["raw"] = mini_soup.getText()
+                            
                             input_params["url"] = url
                             input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
                             self.naked_bases[n] = input_params

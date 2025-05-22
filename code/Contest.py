@@ -283,7 +283,10 @@ class Contest:
                 for k1, v1 in v.items():
                     output_dict[f"{key}_"+unidecode(regex.sub(r"\s", "_", k1))] = v1
         
-        clean_name0 = sorted([e for e in set([input_params.get("regex_out").get("nombre"), input_params.get("bases").get("nombre"), input_params.get("name")]) if e], key=len)[0]
+        try:
+            clean_name0 = sorted([e for e in set([input_params.get("regex_out").get("nombre"), input_params.get("bases").get("nombre"), input_params.get("name")]) if e], key=len)[0]
+        except:
+            clean_name0 = sorted([e for e in set([input_params.get("bases").get("nombre"), input_params.get("name")]) if e], key=len)[0]
         output_dict["clean_name"] = regex.sub(r"\s\([A-Z]\w+.*$", "", regex.sub(r"[\\\/]+", "", clean_name0))
         
         ucols = [e for e in set(list(map(lambda x: regex.sub(r"^(regex_out|bases)_", "", x) if regex.search(r"^(regex_out|bases)_", x) and not regex.search(r"nombre", x) else None, output_dict.keys()))) if e]

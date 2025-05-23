@@ -238,6 +238,8 @@ class Contest:
                             
                             input_params["url"] = url
                             self.naked_bases[n] = input_params
+                            if n > 20:
+                                break
                             
         return self
             

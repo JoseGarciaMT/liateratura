@@ -13,6 +13,7 @@ import regex, os
 import pandas as pd
 
 from unidecode import unidecode
+from tqdm import tqdm
 
 from flask import Flask, render_template, request, session, redirect, url_for, send_from_directory
 
@@ -341,12 +342,21 @@ def story_displayer():
 
 @app.route("/update_contests",  methods=['POST'])
 def new_contests_loader():
+    if _path_exists(contest.naked_bases_path):
+        contest.naked_bases = _read_file(contest.naked_bases_path)
+    else:
+        contest.naked_bases = {}
+       
+    if _path_exists(contest.bases_path):
+        contest.final_bases = _read_file(contest.bases_path)
+    else: 
+       contest.final_bases = {}
+       
     contest.downloading_contest_info()
     _write_file(contest.naked_bases, contest.naked_bases_path)
     
-    contest.final_bases = {}
-    for ncontest, input_params in contest.naked_bases.items(): 
-        cond_long_raw = input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
+    for ncontest, input_params in tqdm(contest.naked_bases.items()): 
+        cond_long_raw = not ncontest in contest.final_bases and input_params and input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
         if cond_long_raw:
             input_params1 = contest.generate_chatgpt_story_rules(input_params)
             cleaned_params = contest.rules_dict_cleaner(input_params1)

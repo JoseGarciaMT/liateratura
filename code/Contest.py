@@ -179,71 +179,70 @@ class Contest:
         soup = bs(resp.content, "html.parser")
         content = soup.find(id="cuento") 
     
-        n = 0
-        self.naked_bases = {}
+        if not self.naked_bases:
+            self.naked_bases = {}
+            
         for mes in content.find_all("ul")[:2]:
             for concurso in tqdm(mes.find_all("li")):
-                n += 1
-                name = regex.sub(r"(?<=\)).*", "", concurso.find("span").text)
-                date = regex.search(r"\d{2}:\d{2}:\d{4}", concurso.text).group()
-                cond_mail = concurso.find("img")
-                cond_spain = regex.search(r"España", concurso.text)
-                cond_age = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*((menores\sde|y)\s([123]\d|diec|veint|treint)|(mayores\sde)\s([4567]\d|cuarent|cincuenta|se[ts]enta))|(nacidos?\sentre\s(\w+\s)*\d\.?\d+(\-|\sy\s)\d\.?\d+)", concurso.text)
-                cond_resid = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*(municipio|provincia|[Cc]omunidad\s[Aa]ut|ciudad|empadronad)", concurso.text)
-                cond_alumn = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*(alumno|estudiante|matriculad)", concurso.text)
+                url = "https://www.escritores.org"+concurso.find("a")["href"]
                 
-                intflag = False
-                if self.naked_bases:
-                    names_str = "__".join([v.get("name") for k, v in self.naked_bases.items()])
-                    already_there_cond = regex.search(regex.sub(r"\s\([A-Z]\w+(\s\w+){,4}\)\s?$", "", name), names_str)
-                    if already_there_cond and len(already_there_cond.group()) >= 5:
-                        intflag = True
-                        
-                if not intflag:
-                    input_params = {}                    
-                    input_params["name"] = name
-                    input_params["date"] = date
-                    input_params["allows_mail"] = bool(cond_mail)
-                    input_params["from_spain"] = bool(cond_spain)
-                    input_params["has_age_restriction"] = bool(cond_age)
-                    input_params["has_residency_restriction"] = bool(cond_resid)
-                    input_params["has_student_restriction"] = bool(cond_alumn)
-                    
-                    # input_params["cumple_condiciones"] = True if (input_params.get("allows_mail") and input_params.get("from_spain") and not (input_params.get("has_age_restriction") or input_params.get("has_residency_restriction") or input_params.get("has_student_restriction"))) else False
-                    if input_params.get("allows_mail"):
-                        url = "https://www.escritores.org"+concurso.find("a")["href"]
-                        resp0 = self._get_proxies(url)
-                        while_n = 0
-                        while not (resp0 or while_n >= 5):
-                            time.sleep(5)
-                            resp0 = self._get_proxies(url)
-                            while_n += 1
-                
-                        if resp0:
-                            mini_soup = bs(resp0.content, "html.parser")
-                            # Cleaning string
-                            try:
-                                input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
-                                input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
-                                input_params["raw"] = input_params["regex_out"].pop("raw")
-                            except:
-                                input_params["regex_out"] = "No se han podido extraer las bases del concurso."
-                                input_params["regex_out_keys"] = ["fecha de vencimiento", "posibilidad de envíar por email (sí o no)", 
-                                                                  "dirección de envío", "país convocante", 
-                                                                  "fecha de vencimiento", "restricciones", 
-                                                                  "premio", "género", "tema", "extensión", 
-                                                                  "formato", "plica", "otros idiomas"]
+                if not url in self.naked_bases:
+                    self.naked_bases[url] = {}
 
-                                input_params["raw"] = mini_soup.getText()
+                    name = regex.sub(r"(?<=\)).*", "", concurso.find("span").text)
+                    date = regex.search(r"\d{2}:\d{2}:\d{4}", concurso.text).group()
+                    cond_mail = concurso.find("img")
+                    cond_spain = regex.search(r"España", concurso.text)
+                    cond_age = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*((menores\sde|y)\s([123]\d|diec|veint|treint)|(mayores\sde)\s([4567]\d|cuarent|cincuenta|se[ts]enta))|(nacidos?\sentre\s(\w+\s)*\d\.?\d+(\-|\sy\s)\d\.?\d+)", concurso.text)
+                    cond_resid = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*(municipio|provincia|[Cc]omunidad\s[Aa]ut|ciudad|empadronad)", concurso.text)
+                    cond_alumn = regex.search(r"Abierto\sa\:\s(\w+\,?\s)*(alumno|estudiante|matriculad)", concurso.text)
+    
+                    intflag = False
+                    if self.naked_bases:
+                        names_str = "__".join([v.get("name") for k, v in self.naked_bases.items()])
+                        already_there_cond = regex.search(regex.sub(r"\s\([A-Z]\w+(\s\w+){,4}\)\s?$", "", name), names_str)
+                        if already_there_cond and len(already_there_cond.group()) >= 5:
+                            intflag = True
                             
-                            input_params["url"] = url
-                            self.naked_bases[n] = input_params
-                if n > 20:
-                    break
+                    if not intflag:
+                        input_params = {}                    
+                        input_params["name"] = name
+                        input_params["date"] = date
+                        input_params["allows_mail"] = bool(cond_mail)
+                        input_params["from_spain"] = bool(cond_spain)
+                        input_params["has_age_restriction"] = bool(cond_age)
+                        input_params["has_residency_restriction"] = bool(cond_resid)
+                        input_params["has_student_restriction"] = bool(cond_alumn)
                         
-            if n > 20:
-                break
-                            
+                        # input_params["cumple_condiciones"] = True if (input_params.get("allows_mail") and input_params.get("from_spain") and not (input_params.get("has_age_restriction") or input_params.get("has_residency_restriction") or input_params.get("has_student_restriction"))) else False
+                        if input_params.get("allows_mail"):
+                            resp0 = self._get_proxies(url)
+                            while_n = 0
+                            while not (resp0 or while_n >= 5):
+                                time.sleep(5)
+                                resp0 = self._get_proxies(url)
+                                while_n += 1
+                    
+                            if resp0:
+                                mini_soup = bs(resp0.content, "html.parser")
+                                # Cleaning string
+                                try:
+                                    input_params["regex_out"] = self.relevant_info_retriever(mini_soup) 
+                                    input_params["regex_out_keys"] = list(input_params.get("regex_out").keys())
+                                    input_params["raw"] = input_params["regex_out"].pop("raw")
+                                except:
+                                    input_params["regex_out"] = "No se han podido extraer las bases del concurso."
+                                    input_params["regex_out_keys"] = ["fecha de vencimiento", "posibilidad de envíar por email (sí o no)", 
+                                                                      "dirección de envío", "país convocante", 
+                                                                      "fecha de vencimiento", "restricciones", 
+                                                                      "premio", "género", "tema", "extensión", 
+                                                                      "formato", "plica", "otros idiomas"]
+    
+                                    input_params["raw"] = mini_soup.getText()
+                                
+                                self.naked_bases[url] = input_params
+
+                        
         return self
             
 
@@ -338,12 +337,12 @@ class Contest:
                     
                     print("\nAsking ChatGPT for the rules of each contest...\n")
                     self.final_bases = {}
-                    for ncontest, input_params in self.naked_bases.items(): 
-                        cond_long_raw = input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
+                    for url_contest, input_params in self.naked_bases.items(): 
+                        cond_long_raw = input_params and input_params.get("raw") and (len(input_params.get("raw")) > len(input_params.get("name"))*5)
                         if cond_long_raw:
                             input_params1 = self.generate_chatgpt_story_rules(input_params)
                             cleaned_params = self.rules_dict_cleaner(input_params1)
-                            self.final_bases[ncontest] = cleaned_params
+                            self.final_bases[url_contest] = cleaned_params
                         
                     _write_file(self.final_bases, self.bases_path)
             

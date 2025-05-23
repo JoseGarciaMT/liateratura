@@ -181,7 +181,7 @@ class Contest:
     
         n = 0
         self.naked_bases = {}
-        for mes in content.find_all("ul"):
+        for mes in content.find_all("ul")[:2]:
             for concurso in tqdm(mes.find_all("li")):
                 n += 1
                 name = regex.sub(r"(?<=\)).*", "", concurso.find("span").text)
